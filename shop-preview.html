@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>AFKProbably | Private Shop Preview</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="shop.css">
+</head>
+<body class="shop-body">
+  <header class="shop-header">
+    <a class="mini-logo" href="index.html">
+      <img src="assets/moon-mark.png" alt="">
+      <span>AFKProbably</span>
+    </a>
+    <nav>
+      <span class="preview-badge">PRIVATE PREVIEW</span>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </header>
+
+  <main class="shop-shell">
+    <section id="previewAuth" class="preview-lock" hidden>
+      <p class="eyebrow">PRIVATE PREVIEW</p>
+      <h1>Sign in to preview the shop</h1>
+      <p>This route is intentionally hidden from the public site.</p>
+      <a class="primary-button inline-button" href="admin.html">Go to admin login</a>
+    </section>
+
+    <section id="previewShop" hidden>
+      <div class="shop-hero">
+        <p class="eyebrow">AFKPROBABLY 3D</p>
+        <h1>Mesh Shop Preview</h1>
+        <p>This is what your catalog will look like when you launch. Drafts and hidden products are visible here only to you.</p>
+      </div>
+      <div id="previewGrid" class="product-grid"></div>
+      <p id="emptyPreview" class="empty-state" hidden>No listings yet. Add your first mesh from the admin page.</p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="shop-preview.js"></script>
+</body>
+</html>
