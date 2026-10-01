@@ -1,0 +1,168 @@
+@font-face{
+  font-family:"Super Malibu";
+  src:url("assets/fonts/SuperMalibu.ttf") format("truetype");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+
+:root{
+  --purple:#7c0af8;
+  --purple-deep:#5310a8;
+  --lavender:#d9b6ff;
+  --lavender-light:#f1e8ff;
+  --ink:#2b1645;
+  --panel:rgba(255,255,255,.78);
+  --panel-border:rgba(255,255,255,.55);
+}
+
+*{box-sizing:border-box}
+
+body{
+  min-height:100vh;
+  margin:0;
+  font-family:Arial,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 20% 15%,rgba(255,255,255,.35),transparent 25%),
+    radial-gradient(circle at 80% 75%,rgba(255,255,255,.2),transparent 30%),
+    linear-gradient(135deg,#9d86f8,#d9b6ff 50%,#7c0af8);
+}
+
+.landing{
+  width:min(960px,100%);
+  min-height:100vh;
+  margin:0 auto;
+  padding:48px 24px 32px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+.logo{
+  width:min(760px,96%);
+  margin:0 auto 30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  filter:drop-shadow(0 12px 24px rgba(61,12,115,.18));
+}
+
+.logo-mark{
+  width:clamp(84px,15vw,150px);
+  height:auto;
+  flex:0 0 auto;
+}
+
+.logo-wordmark{
+  font-family:"Super Malibu", cursive;
+  color:var(--purple);
+  font-size:clamp(3.1rem,9vw,7.5rem);
+  line-height:.85;
+  white-space:nowrap;
+  letter-spacing:.01em;
+}
+
+.coming-soon{
+  width:min(760px,100%);
+  padding:38px 34px;
+  border:1px solid var(--panel-border);
+  border-radius:28px;
+  background:var(--panel);
+  box-shadow:0 24px 70px rgba(67,10,126,.18);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+.eyebrow{
+  margin:0 0 10px;
+  color:var(--purple);
+  font-size:.82rem;
+  font-weight:800;
+  letter-spacing:.18em;
+}
+
+h1{
+  margin:0;
+  color:var(--purple-deep);
+  font-size:clamp(2.2rem,6vw,4.5rem);
+  line-height:1;
+  letter-spacing:-.045em;
+}
+
+.intro{
+  max-width:660px;
+  margin:24px auto 0;
+  font-size:1.08rem;
+  line-height:1.7;
+}
+
+.shop-features{
+  margin:28px auto 4px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+}
+
+.shop-features span{
+  padding:10px 14px;
+  border:1px solid rgba(124,10,248,.18);
+  border-radius:999px;
+  color:var(--purple-deep);
+  background:var(--lavender-light);
+  font-size:.92rem;
+  font-weight:700;
+}
+
+.status{
+  margin:28px 0 0;
+  color:var(--purple);
+}
+
+.tagline{
+  margin:10px 0 0;
+  opacity:.75;
+}
+
+footer{
+  padding:26px 10px 0;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  font-size:.9rem;
+}
+
+footer a{
+  color:var(--purple-deep);
+  font-weight:700;
+  text-decoration:none;
+}
+
+footer a:hover,
+footer a:focus-visible{
+  text-decoration:underline;
+}
+
+article{
+  max-width:900px;
+  margin:auto;
+  padding:40px 24px;
+}
+
+article a{color:var(--purple)}
+
+@media (max-width:600px){
+  .landing{padding:32px 18px 24px}
+  .logo{gap:10px;margin-bottom:24px}
+  .logo-mark{width:78px}
+  .logo-wordmark{font-size:clamp(2.45rem,13vw,4.2rem)}
+  .landing{padding:32px 18px 24px}
+  .coming-soon{padding:30px 20px;border-radius:22px}
+  .intro{font-size:1rem}
+  .shop-features{gap:8px}
+  .shop-features span{font-size:.84rem}
+}
