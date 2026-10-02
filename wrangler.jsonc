@@ -12,6 +12,6 @@
     "SUPABASE_URL": "https://iabfgfawninqjsukjhfu.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_fI3nxwqRHXvIkKLqUQuZ_Q_6MECnVwJ",
     "ADMIN_EMAIL": "admin@afkprobably.com",
-    "SHOP_LIVE": "false"
+    "SHOP_LIVE": "true"
   }
 }
