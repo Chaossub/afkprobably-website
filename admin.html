@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="robots"
+    content="noindex,nofollow,noarchive"
+  >
+
+  <title>
+    AFKProbably Admin
+  </title>
+
+  <link
+    rel="icon"
+    href="assets/favicon.svg"
+    type="image/svg+xml"
+  >
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="admin.css"
+  >
+
+</head>
+
+
+<body class="admin-body">
+
+  <main class="admin-shell">
+
+    <header class="admin-header">
+
+      <a
+        class="mini-logo"
+        href="index.html"
+        aria-label="AFKProbably home"
+      >
+
+        <img
+          src="assets/moon-mark.png"
+          alt=""
+        >
+
+        <span>
+          AFKProbably
+        </span>
+
+      </a>
+
+
+      <div class="admin-actions">
+
+        <a
+          class="ghost-button"
+          href="shop.html"
+        >
+          Private Shop Preview
+        </a>
+
+        <button
+          id="signOutBtn"
+          class="ghost-button"
+          type="button"
+          hidden
+        >
+          Sign out
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <section
+      id="setupPanel"
+      class="admin-card"
+      hidden
+    >
+
+      <p class="eyebrow">
+        SETUP REQUIRED
+      </p>
+
+      <h1>
+        Connect Supabase
+      </h1>
+
+      <p>
+        This admin panel is built, but it needs your
+        Supabase project URL and anon key before login
+        and uploads can work.
+      </p>
+
+      <ol class="setup-list">
+
+        <li>
+          Open <strong>config.js</strong>
+          in your GitHub repo.
+        </li>
+
+        <li>
+          Paste your Supabase project URL
+          and anon/public key.
+        </li>
+
+        <li>
+          Run the included
+          <strong>supabase/schema.sql</strong>
+          in the Supabase SQL editor.
+        </li>
+
+        <li>
+          Create your admin account in
+          Supabase Authentication.
+        </li>
+
+      </ol>
+
+    </section>
+
+
+    <section
+      id="authPanel"
+      class="admin-card auth-card"
+      hidden
+    >
+
+      <p class="eyebrow">
+        PRIVATE ADMIN
+      </p>
+
+      <h1>
+        Admin access
+      </h1>
+
+      <p id="adminAuthCopy">
+        Admin uses the same AFKProbably account login
+        as My Library.
+      </p>
+
+      <a
+        class="primary-button inline-button"
+        href="library.html"
+      >
+        Sign in / My Library
+      </a>
+
+      <p
+        id="loginMessage"
+        class="form-message"
+        aria-live="polite"
+      ></p>
+
+    </section>
+
+
+    <section
+      id="adminPanel"
+      hidden
+    >
+
+      <div class="admin-grid">
+
+
+        <section class="admin-card editor-card">
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                PRODUCT EDITOR
+              </p>
+
+              <h1 id="editorTitle">
+                Add a mesh
+              </h1>
+
+            </div>
+
+
+            <button
+              id="resetFormBtn"
+              class="ghost-button"
+              type="button"
+            >
+              New listing
+            </button>
+
+          </div>
+
+
+          <form
+            id="productForm"
+            class="product-form"
+          >
+
+            <input
+              id="productId"
+              type="hidden"
+            >
+
+
+            <label class="full">
+
+              Product name
+
+              <input
+                id="name"
+                type="text"
+                maxlength="120"
+                required
+                placeholder="Jack-O'-Lantern Apple"
+              >
+
+            </label>
+
+
+            <label>
+
+              Category
+
+              <input
+                id="category"
+                type="text"
+                maxlength="80"
+                placeholder="Halloween / Decor"
+              >
+
+            </label>
+
+
+            <label>
+
+              Status
+
+              <select id="status">
+
+                <option value="draft">
+                  Draft
+                </option>
+
+                <option value="published">
+                  Published
+                </option>
+
+                <option value="hidden">
+                  Hidden
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label>
+
+              Personal license price ($)
+
+              <input
+                id="personalPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="3.99"
+              >
+
+            </label>
+
+
+            <label class="full">
+
+              Short description
+
+              <textarea
+                id="description"
+                rows="4"
+                maxlength="1500"
+                placeholder="Describe the model and what makes it cute/useful/weird."
+              ></textarea>
+
+            </label>
+
+
+            <label class="full">
+
+              Print notes
+
+              <textarea
+                id="printNotes"
+                rows="3"
+                maxlength="1500"
+                placeholder="Supports, layer height, orientation, dimensions, etc."
+              ></textarea>
+
+            </label>
+
+
+            <div class="upload-block full">
+
+              <div>
+
+                <strong>
+                  Preview photos
+                </strong>
+
+                <span>
+                  Public product images only —
+                  PNG/JPG/WebP.
+                </span>
+
+              </div>
+
+              <input
+                id="imageFiles"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                multiple
+              >
+
+            </div>
+
+
+            <div class="upload-block full locked-upload">
+
+              <div>
+
+                <strong>
+                  Locked mesh files
+                </strong>
+
+                <span>
+                  STL / 3MF / ZIP. These upload to a private
+                  bucket and are never exposed on the public
+                  product page.
+                </span>
+
+              </div>
+
+              <input
+                id="meshFiles"
+                type="file"
+                accept=".stl,.3mf,.zip,application/zip"
+                multiple
+              >
+
+            </div>
+
+
+            <div class="full form-footer">
+
+              <p
+                id="saveMessage"
+                class="form-message"
+                aria-live="polite"
+              ></p>
+
+              <button
+                id="saveBtn"
+                class="primary-button"
+                type="submit"
+              >
+                Save listing
+              </button>
+
+            </div>
+
+          </form>
+
+        </section>
+
+
+        <aside class="admin-card listings-card">
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                YOUR CATALOG
+              </p>
+
+              <h2>
+                Listings
+              </h2>
+
+            </div>
+
+            <button
+              id="refreshBtn"
+              class="ghost-button"
+              type="button"
+            >
+              Refresh
+            </button>
+
+          </div>
+
+          <div
+            id="listingList"
+            class="listing-list"
+          ></div>
+
+        </aside>
+
+
+      </div>
+
+    </section>
+
+
+
+    <section
+      id="commercialAdmin"
+      class="admin-card commission-admin-card"
+      hidden
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <p class="eyebrow">
+            COMMERCIAL LICENSING
+          </p>
+
+          <h2>
+            Shop-wide license pricing
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <p>
+        These licenses cover every AFKProbably mesh
+        a customer has purchased. Monthly rights remain
+        active while the Stripe subscription is active;
+        Lifetime rights do not expire unless the license
+        terms are violated.
+      </p>
+
+
+      <form
+        id="commercialPlanForm"
+        class="product-form"
+      >
+
+        <label>
+
+          Monthly price ($)
+
+          <input
+            id="monthlyCommercialPrice"
+            type="number"
+            min="0.50"
+            step="0.01"
+            placeholder="Set your monthly price"
+          >
+
+        </label>
+
+
+        <label>
+
+          Lifetime price ($)
+
+          <input
+            id="lifetimeCommercialPrice"
+            type="number"
+            min="0.50"
+            step="0.01"
+            placeholder="Set your lifetime price"
+          >
+
+        </label>
+
+
+        <label>
+
+          <span>
+            Monthly plan
+          </span>
+
+          <select id="monthlyCommercialActive">
+
+            <option value="true">
+              Active
+            </option>
+
+            <option value="false">
+              Hidden
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label>
+
+          <span>
+            Lifetime plan
+          </span>
+
+          <select id="lifetimeCommercialActive">
+
+            <option value="true">
+              Active
+            </option>
+
+            <option value="false">
+              Hidden
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <div class="full form-footer">
+
+          <p
+            id="commercialPlanMessage"
+            class="form-message"
+          ></p>
+
+          <button
+            class="primary-button"
+            type="submit"
+          >
+            Save commercial plans
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+
+    <section
+      id="commissionAdmin"
+      class="admin-card commission-admin-card"
+      hidden
+    >
+
+      <div class="section-heading">
+
+        <div>
+
+          <p class="eyebrow">
+            COMMISSIONS
+          </p>
+
+          <h2>
+            Requests
+          </h2>
+
+        </div>
+
+
+        <button
+          id="refreshCommissionsBtn"
+          class="ghost-button"
+          type="button"
+        >
+          Refresh
+        </button>
+
+      </div>
+
+
+      <p>
+        Review requests, email customers from your
+        commissions address, send Stripe payment
+        requests, and securely deliver finished commission files.
+      </p>
+
+
+      <div
+        id="commissionRequestList"
+        class="commission-request-list"
+      ></div>
+
+    </section>
+
+  </main>
+
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="config.js"></script>
+
+  <script src="admin.js"></script>
+
+  <script src="admin-commissions-v2.js"></script>
+
+</body>
+
+</html>
