@@ -32,6 +32,7 @@
   );
 
   let listings = [];
+  let showHiddenListings = false;
 
   const moneyToCents = value =>
     value === '' ? null : Math.round(Number(value) * 100);
@@ -135,23 +136,71 @@
       return;
     }
 
-    // Hidden products stay in the database for purchase history,
-    // but do not clutter the normal Admin Listings panel.
-    listings = (data || []).filter(item => item.status !== 'hidden');
+    const allListings = data || [];
+
+    listings = showHiddenListings
+      ? allListings
+      : allListings.filter(item => item.status !== 'hidden');
+
+    const hiddenCount = allListings.filter(
+      item => item.status === 'hidden'
+    ).length;
+
+    const toggleHtml = `
+      <div
+        class="listing-visibility-toggle"
+        style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap"
+      >
+        <button
+          type="button"
+          class="tiny-button"
+          id="toggleHiddenListingsBtn"
+        >
+          ${
+            showHiddenListings
+              ? 'Hide hidden listings'
+              : `Show hidden listings${
+                  hiddenCount ? ` (${hiddenCount})` : ''
+                }`
+          }
+        </button>
+      </div>
+    `;
 
     if (!listings.length) {
       listingList.innerHTML =
-        '<p>No active or draft products yet.</p>';
+        toggleHtml +
+        `<p>${
+          showHiddenListings
+            ? 'No products yet.'
+            : 'No active or draft products yet.'
+        }</p>`;
+
+      document
+        .getElementById('toggleHiddenListingsBtn')
+        ?.addEventListener('click', async () => {
+          showHiddenListings = !showHiddenListings;
+          await loadListings();
+        });
+
       return;
     }
 
-    listingList.innerHTML = listings
-      .map(
-        item => `
+    listingList.innerHTML =
+      toggleHtml +
+      listings
+        .map(
+          item => `
       <article class="listing-item">
+
         <div class="listing-row">
-          <span class="listing-name">${escapeHtml(item.name)}</span>
-          <span class="status-pill">${escapeHtml(item.status)}</span>
+          <span class="listing-name">
+            ${escapeHtml(item.name)}
+          </span>
+
+          <span class="status-pill">
+            ${escapeHtml(item.status)}
+          </span>
         </div>
 
         <div class="listing-meta">
@@ -159,18 +208,34 @@
         </div>
 
         <div class="listing-buttons">
-          <button class="tiny-button" data-edit="${item.id}">
+
+          <button
+            class="tiny-button"
+            data-edit="${item.id}"
+          >
             Edit
           </button>
 
-          <button class="tiny-button danger" data-delete="${item.id}">
+          <button
+            class="tiny-button danger"
+            data-delete="${item.id}"
+          >
             Delete
           </button>
+
         </div>
+
       </article>
     `
-      )
-      .join('');
+        )
+        .join('');
+
+    document
+      .getElementById('toggleHiddenListingsBtn')
+      ?.addEventListener('click', async () => {
+        showHiddenListings = !showHiddenListings;
+        await loadListings();
+      });
 
     listingList
       .querySelectorAll('[data-edit]')
