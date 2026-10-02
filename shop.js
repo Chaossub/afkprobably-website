@@ -23,6 +23,8 @@
 
   const payload = await response.json();
   const products = payload.products || [];
+  const memberDiscount = payload.memberDiscount || { plan: null, percent: 0 };
+  const discountPercent = Number(memberDiscount.percent || 0);
   shopView.hidden = false;
   if (payload.preview) {
     previewBadge.hidden = false;
@@ -59,7 +61,9 @@
             <p class="card-description">${escapeHtml(product.description || 'A downloadable 3D-print mesh from AFKProbably.')}</p>
             <div class="catalog-footer">
               <div class="price-stack">
-                ${product.personal_price_cents != null ? `<span>Personal ${formatPrice(product.personal_price_cents)}</span>` : ''}
+                ${product.personal_price_cents != null ? (discountPercent > 0
+                  ? `<span class="shop-member-price"><span class="original-price">${formatPrice(product.personal_price_cents)}</span> ${formatPrice(applyDiscount(product.personal_price_cents, discountPercent))}<small>${discountPercent}% ${memberDiscount.plan === 'lifetime' ? 'lifetime' : 'monthly'} member discount</small></span>`
+                  : `<span>${formatPrice(product.personal_price_cents)}</span>`) : ''}
               </div>
               <a class="view-button" href="product.html?id=${encodeURIComponent(product.id)}">View mesh</a>
             </div>
@@ -72,6 +76,7 @@
   categoryFilter.addEventListener('change', render);
   render();
 
+  function applyDiscount(cents, percent) { return Math.max(50, Math.round(Number(cents) * (1 - Number(percent || 0) / 100))); }
   function formatPrice(cents) { return `$${(Number(cents) / 100).toFixed(2)}`; }
   function escapeHtml(value='') { return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[ch])); }
   function escapeAttr(value='') { return escapeHtml(value); }

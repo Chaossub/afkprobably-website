@@ -15,6 +15,8 @@
   if (!response.ok) { lockedView.hidden = false; return; }
   const payload = await response.json();
   const product = payload.product;
+  const memberDiscount = payload.memberDiscount || { plan: null, percent: 0 };
+  const discountPercent = Number(memberDiscount.percent || 0);
   productView.hidden = false;
 
   if (payload.preview) {
@@ -41,7 +43,14 @@
   thumbStrip.querySelectorAll('[data-image]').forEach(btn => btn.addEventListener('click', () => setImage(images[Number(btn.dataset.image)])));
 
   const options = [];
-  if (Number.isInteger(product.personal_price_cents)) options.push({ type:'personal', label:'Mesh + Personal License', price:product.personal_price_cents, copy:'Download this mesh for your own prints, gifts, and other non-commercial personal use.' });
+  if (Number.isInteger(product.personal_price_cents)) options.push({
+    type:'personal',
+    label: discountPercent > 0 ? 'Mesh + Commercial License' : 'Mesh + Personal License',
+    price:product.personal_price_cents,
+    copy: discountPercent > 0
+      ? 'Your active commercial plan covers this purchased mesh for commercial physical-print sales, including modified versions, subject to the license terms.'
+      : 'Download this mesh for your own prints, gifts, and other non-commercial personal use.'
+  });
   let ownedLicenses = [];
   if (session) {
     try {
@@ -52,10 +61,14 @@
 
   document.getElementById('licenseOptions').innerHTML = options.map(option => {
     const owned = ownedLicenses.includes(option.type);
+    const discounted = applyDiscount(option.price, discountPercent);
+    const priceMarkup = discountPercent > 0
+      ? `<div class="member-price"><span class="original-price">${formatPrice(option.price)}</span><strong>${formatPrice(discounted)}</strong><small>${discountPercent}% commercial member discount</small></div>`
+      : `<strong>${formatPrice(option.price)}</strong>`;
     return `
     <article class="license-option ${owned ? 'owned-license' : ''}">
-      <div><h3>${option.label}</h3><p>${option.copy}</p>${owned ? '<span class="owned-pill">Owned</span>' : ''}</div>
-      <div class="license-action"><strong>${formatPrice(option.price)}</strong>${owned ? '<a class="buy-button owned-button" href="library.html">Download in My Library</a>' : `<button class="buy-button" data-license="${option.type}">${payload.preview ? 'Test checkout' : 'Buy now'}</button>`}</div>
+      <div><h3>${option.label}</h3><p>${option.copy}</p>${discountPercent > 0 ? `<span class="member-discount-pill">${memberDiscount.plan === 'lifetime' ? 'Lifetime' : 'Monthly'} commercial · ${discountPercent}% off</span>` : ''}${owned ? '<span class="owned-pill">Owned</span>' : ''}</div>
+      <div class="license-action">${priceMarkup}${owned ? '<a class="buy-button owned-button" href="library.html">Download in My Library</a>' : `<button class="buy-button" data-license="${option.type}">${payload.preview ? 'Test checkout' : 'Buy now'}</button>`}</div>
     </article>`;
   }).join('');
 
@@ -78,6 +91,7 @@
     });
   });
 
+  function applyDiscount(cents, percent) { return Math.max(50, Math.round(Number(cents) * (1 - Number(percent || 0) / 100))); }
   function formatPrice(cents) { return `$${(Number(cents)/100).toFixed(2)}`; }
   function escapeHtml(value='') { return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[ch])); }
   function escapeAttr(value='') { return escapeHtml(value); }
