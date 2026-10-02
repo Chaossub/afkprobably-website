@@ -9,11 +9,16 @@
     content="width=device-width, initial-scale=1.0"
   >
 
+  <meta
+    name="description"
+    content="AFKProbably 3D printable meshes, commercial licensing, and custom commissions."
+  >
+
   <title>AFKProbably</title>
 
   <link
     rel="icon"
-    href="assets/favicon.svg"
+    href="/assets/favicon.svg"
     type="image/svg+xml"
   >
 
@@ -25,11 +30,18 @@
     html,
     body {
       margin: 0;
+      padding: 0;
       min-height: 100%;
     }
 
     body {
       min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 30px 20px;
 
       font-family:
         Arial,
@@ -41,23 +53,26 @@
       background:
         linear-gradient(
           135deg,
-          #d9ceff 0%,
-          #c7adff 42%,
-          #9d86f8 72%,
-          #7c0af8 100%
+          #ddd3ff 0%,
+          #cbb5ff 35%,
+          #ac91ff 65%,
+          #8b35ff 100%
         );
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      padding: 40px 20px;
     }
 
     .page {
-      width: min(920px, 100%);
+      width: min(900px, 100%);
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
       text-align: center;
     }
+
+    /*
+      BRAND
+    */
 
     .brand {
       display: flex;
@@ -66,46 +81,46 @@
 
       gap: 12px;
 
-      margin-bottom: 34px;
+      margin-bottom: 30px;
     }
 
     .brand img {
-      width: 82px;
-      height: 82px;
+      width: 78px;
+      height: 78px;
 
       object-fit: contain;
-
-      flex: 0 0 auto;
+      flex-shrink: 0;
     }
 
     .brand-name {
       margin: 0;
 
-      color: #6812e8;
+      color: #6419e8;
 
       font-size:
         clamp(
           3rem,
           8vw,
-          6.2rem
+          6rem
         );
 
       font-weight: 900;
 
-      line-height: 0.95;
+      line-height: 1;
 
-      letter-spacing: -0.04em;
+      letter-spacing: -0.045em;
     }
 
-    .coming-card {
-      width: min(680px, 100%);
+    /*
+      LOADING CARD
+    */
 
-      margin: 0 auto;
+    .card {
+      width: min(560px, 100%);
 
       padding:
-        42px
-        42px
-        38px;
+        38px
+        32px;
 
       background:
         rgba(
@@ -121,22 +136,24 @@
           255,
           255,
           255,
-          0.7
+          0.75
         );
 
       border-radius: 28px;
 
       box-shadow:
-        0 28px 70px
+        0
+        26px
+        70px
         rgba(
-          80,
-          30,
-          130,
+          84,
+          26,
+          145,
           0.16
         );
 
       backdrop-filter:
-        blur(10px);
+        blur(12px);
     }
 
     .eyebrow {
@@ -145,9 +162,10 @@
         0
         12px;
 
-      color: #6515cf;
+      color: #701be2;
 
-      font-size: 0.9rem;
+      font-size: 0.82rem;
+
       font-weight: 900;
 
       letter-spacing: 0.18em;
@@ -156,154 +174,202 @@
     h1 {
       margin:
         0
-        auto
-        22px;
+        0
+        14px;
 
-      max-width: 620px;
-
-      color: #4c1295;
+      color: #4e129b;
 
       font-size:
         clamp(
-          2.8rem,
-          7vw,
-          5rem
+          2.2rem,
+          6vw,
+          3.7rem
         );
 
-      line-height: 0.95;
+      line-height: 1;
 
-      letter-spacing: -0.04em;
+      letter-spacing: -0.035em;
     }
 
-    .description {
-      max-width: 590px;
-
+    .message {
       margin:
         0
-        auto;
+        auto
+        24px;
 
-      color: #4a3758;
+      max-width: 430px;
 
-      font-size: 1.08rem;
+      color: #5b4967;
+
+      font-size: 1rem;
+
       line-height: 1.6;
     }
 
-    .features {
-      display: flex;
+    /*
+      BUTTON
+    */
+
+    .shop-button {
+      display: inline-flex;
+
+      align-items: center;
       justify-content: center;
-      flex-wrap: wrap;
 
-      gap: 10px;
+      min-height: 50px;
 
-      margin:
-        28px
-        0
-        24px;
-    }
-
-    .feature {
       padding:
-        9px
-        16px;
-
-      border:
-        1px solid
-        rgba(
-          94,
-          22,
-          185,
-          0.18
-        );
+        0
+        26px;
 
       border-radius: 999px;
 
       background:
-        rgba(
-          255,
-          255,
-          255,
-          0.55
+        linear-gradient(
+          135deg,
+          #7020ed,
+          #9511ff
         );
 
-      color: #5912a9;
+      color: white;
 
-      font-size: 0.9rem;
-      font-weight: 800;
-    }
+      font-size: 1rem;
+      font-weight: 900;
 
-    .status {
-      margin:
-        10px
+      text-decoration: none;
+
+      box-shadow:
         0
-        0;
-
-      color: #6914cf;
-
-      font-weight: 800;
-    }
-
-    .tagline {
-      margin:
         12px
+        28px
+        rgba(
+          110,
+          24,
+          225,
+          0.25
+        );
+
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+    .shop-button:hover {
+      transform:
+        translateY(-2px);
+
+      box-shadow:
+        0
+        15px
+        34px
+        rgba(
+          110,
+          24,
+          225,
+          0.32
+        );
+    }
+
+    .small-note {
+      margin:
+        18px
         0
         0;
 
-      color: #66516f;
+      color: #786984;
 
-      font-style: italic;
+      font-size: 0.85rem;
     }
+
+    /*
+      FOOTER
+    */
 
     footer {
-      margin-top: 26px;
+      margin-top: 24px;
 
-      font-size: 0.88rem;
+      color: #4a176b;
 
-      color: #4b176e;
+      font-size: 0.86rem;
     }
 
     footer a {
       color: inherit;
+
       font-weight: 700;
     }
 
-    @media (max-width: 620px) {
+    /*
+      MOBILE
+    */
+
+    @media (max-width: 600px) {
 
       body {
         padding:
-          28px
-          16px;
+          24px
+          15px;
       }
 
       .brand {
         gap: 8px;
-        margin-bottom: 26px;
+
+        margin-bottom: 24px;
       }
 
       .brand img {
-        width: 58px;
-        height: 58px;
+        width: 54px;
+        height: 54px;
       }
 
       .brand-name {
         font-size:
           clamp(
-            2.7rem,
+            2.6rem,
             13vw,
-            4.2rem
+            4rem
           );
       }
 
-      .coming-card {
+      .card {
         padding:
-          34px
-          22px;
-      }
-
-      .description {
-        font-size: 1rem;
+          32px
+          20px;
       }
     }
+
   </style>
+
+
+  <!--
+    Send the main domain directly to the shop.
+    JavaScript does it immediately.
+    The meta refresh is a backup.
+  -->
+
+  <meta
+    http-equiv="refresh"
+    content="1; url=/shop.html"
+  >
+
+  <script>
+    window.addEventListener(
+      'DOMContentLoaded',
+      () => {
+
+        setTimeout(
+          () => {
+            window.location.replace(
+              '/shop.html'
+            );
+          },
+          250
+        );
+
+      }
+    );
+  </script>
+
 </head>
 
 
@@ -314,7 +380,7 @@
     <div class="brand">
 
       <img
-        src="assets/moon-mark.png"
+        src="/assets/moon-mark.png"
         alt=""
       >
 
@@ -325,48 +391,33 @@
     </div>
 
 
-    <section class="coming-card">
+    <section class="card">
 
       <p class="eyebrow">
         AFKPROBABLY 3D
       </p>
 
       <h1>
-        Online Shop Coming Soon
+        Opening the Shop
       </h1>
 
-      <p class="description">
-        The AFKProbably shop is currently in the works.
-        Soon you'll be able to purchase downloadable
-        3D-print meshes, commercial licensing, and
-        request custom commissions directly through
-        the site.
+      <p class="message">
+        Taking you to AFKProbably's
+        3D printable meshes,
+        commercial licensing,
+        and commissions.
       </p>
 
+      <a
+        class="shop-button"
+        href="/shop.html"
+      >
+        Enter Shop
+      </a>
 
-      <div class="features">
-
-        <span class="feature">
-          3D Print Meshes
-        </span>
-
-        <span class="feature">
-          Commercial Licensing
-        </span>
-
-        <span class="feature">
-          Custom Commissions
-        </span>
-
-      </div>
-
-
-      <p class="status">
-        🚧 Currently in Development
-      </p>
-
-      <p class="tagline">
-        AFK for now. Probably not for long.
+      <p class="small-note">
+        If the shop doesn't open automatically,
+        click the button above.
       </p>
 
     </section>
@@ -374,13 +425,13 @@
 
     <footer>
 
-      <a href="privacy.html">
+      <a href="/privacy.html">
         Privacy Policy
       </a>
 
       &nbsp;•&nbsp;
 
-      <a href="terms.html">
+      <a href="/terms.html">
         Terms of Use
       </a>
 
