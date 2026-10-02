@@ -1,42 +1,393 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="AFKProbably 3D print meshes, commercial licensing, and custom commissions. Online shop coming soon.">
-  <title>AFKProbably | Online Shop Coming Soon</title>
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>AFKProbably</title>
+
+  <link
+    rel="icon"
+    href="assets/favicon.svg"
+    type="image/svg+xml"
+  >
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      color: #32104f;
+
+      background:
+        linear-gradient(
+          135deg,
+          #d9ceff 0%,
+          #c7adff 42%,
+          #9d86f8 72%,
+          #7c0af8 100%
+        );
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 40px 20px;
+    }
+
+    .page {
+      width: min(920px, 100%);
+      text-align: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      gap: 12px;
+
+      margin-bottom: 34px;
+    }
+
+    .brand img {
+      width: 82px;
+      height: 82px;
+
+      object-fit: contain;
+
+      flex: 0 0 auto;
+    }
+
+    .brand-name {
+      margin: 0;
+
+      color: #6812e8;
+
+      font-size:
+        clamp(
+          3rem,
+          8vw,
+          6.2rem
+        );
+
+      font-weight: 900;
+
+      line-height: 0.95;
+
+      letter-spacing: -0.04em;
+    }
+
+    .coming-card {
+      width: min(680px, 100%);
+
+      margin: 0 auto;
+
+      padding:
+        42px
+        42px
+        38px;
+
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          0.9
+        );
+
+      border:
+        1px solid
+        rgba(
+          255,
+          255,
+          255,
+          0.7
+        );
+
+      border-radius: 28px;
+
+      box-shadow:
+        0 28px 70px
+        rgba(
+          80,
+          30,
+          130,
+          0.16
+        );
+
+      backdrop-filter:
+        blur(10px);
+    }
+
+    .eyebrow {
+      margin:
+        0
+        0
+        12px;
+
+      color: #6515cf;
+
+      font-size: 0.9rem;
+      font-weight: 900;
+
+      letter-spacing: 0.18em;
+    }
+
+    h1 {
+      margin:
+        0
+        auto
+        22px;
+
+      max-width: 620px;
+
+      color: #4c1295;
+
+      font-size:
+        clamp(
+          2.8rem,
+          7vw,
+          5rem
+        );
+
+      line-height: 0.95;
+
+      letter-spacing: -0.04em;
+    }
+
+    .description {
+      max-width: 590px;
+
+      margin:
+        0
+        auto;
+
+      color: #4a3758;
+
+      font-size: 1.08rem;
+      line-height: 1.6;
+    }
+
+    .features {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+
+      gap: 10px;
+
+      margin:
+        28px
+        0
+        24px;
+    }
+
+    .feature {
+      padding:
+        9px
+        16px;
+
+      border:
+        1px solid
+        rgba(
+          94,
+          22,
+          185,
+          0.18
+        );
+
+      border-radius: 999px;
+
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          0.55
+        );
+
+      color: #5912a9;
+
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .status {
+      margin:
+        10px
+        0
+        0;
+
+      color: #6914cf;
+
+      font-weight: 800;
+    }
+
+    .tagline {
+      margin:
+        12px
+        0
+        0;
+
+      color: #66516f;
+
+      font-style: italic;
+    }
+
+    footer {
+      margin-top: 26px;
+
+      font-size: 0.88rem;
+
+      color: #4b176e;
+    }
+
+    footer a {
+      color: inherit;
+      font-weight: 700;
+    }
+
+    @media (max-width: 620px) {
+
+      body {
+        padding:
+          28px
+          16px;
+      }
+
+      .brand {
+        gap: 8px;
+        margin-bottom: 26px;
+      }
+
+      .brand img {
+        width: 58px;
+        height: 58px;
+      }
+
+      .brand-name {
+        font-size:
+          clamp(
+            2.7rem,
+            13vw,
+            4.2rem
+          );
+      }
+
+      .coming-card {
+        padding:
+          34px
+          22px;
+      }
+
+      .description {
+        font-size: 1rem;
+      }
+    }
+  </style>
 </head>
+
+
 <body>
-  <main class="landing">
-    <div class="logo" aria-label="AFKProbably">
-      <img src="assets/moon-mark.png" alt="" class="logo-mark" aria-hidden="true">
-      <span class="logo-wordmark">AFKProbably</span>
-    </div>
 
-    <section class="coming-soon" aria-labelledby="shop-heading">
-      <p class="eyebrow">AFKPROBABLY 3D</p>
-      <h1 id="shop-heading">Online Shop Coming Soon</h1>
-      <p class="intro">
-        The AFKProbably shop is currently in the works. Soon you'll be able to purchase downloadable 3D-print meshes, choose personal or commercial-use licensing, and request custom commissions directly through the site.
-      </p>
+  <main class="page">
 
-      <div class="shop-features" aria-label="Coming shop features">
-        <span>3D Print Meshes</span>
-        <span>Commercial Licensing</span>
-        <span>Custom Commissions</span>
+    <div class="brand">
+
+      <img
+        src="assets/moon-mark.png"
+        alt=""
+      >
+
+      <div class="brand-name">
+        AFKProbably
       </div>
 
-      <p class="status"><strong>🚧 Currently in Development</strong></p>
-      <p class="tagline"><em>AFK for now. Probably not for long.</em></p>
+    </div>
+
+
+    <section class="coming-card">
+
+      <p class="eyebrow">
+        AFKPROBABLY 3D
+      </p>
+
+      <h1>
+        Online Shop Coming Soon
+      </h1>
+
+      <p class="description">
+        The AFKProbably shop is currently in the works.
+        Soon you'll be able to purchase downloadable
+        3D-print meshes, commercial licensing, and
+        request custom commissions directly through
+        the site.
+      </p>
+
+
+      <div class="features">
+
+        <span class="feature">
+          3D Print Meshes
+        </span>
+
+        <span class="feature">
+          Commercial Licensing
+        </span>
+
+        <span class="feature">
+          Custom Commissions
+        </span>
+
+      </div>
+
+
+      <p class="status">
+        🚧 Currently in Development
+      </p>
+
+      <p class="tagline">
+        AFK for now. Probably not for long.
+      </p>
+
     </section>
 
+
     <footer>
-      <a href="privacy.html">Privacy Policy</a>
-      <span aria-hidden="true">•</span>
-      <a href="terms.html">Terms of Use</a>
+
+      <a href="privacy.html">
+        Privacy Policy
+      </a>
+
+      &nbsp;•&nbsp;
+
+      <a href="terms.html">
+        Terms of Use
+      </a>
+
     </footer>
+
   </main>
+
 </body>
+
 </html>
