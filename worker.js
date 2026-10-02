@@ -7,43 +7,73 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (url.pathname === '/api/shop-state' && request.method === 'GET') {
+    if (
+      url.pathname === '/api/shop-state' &&
+      request.method === 'GET'
+    ) {
       return shopState(request, env);
     }
 
-    if (url.pathname === '/api/catalog' && request.method === 'GET') {
+    if (
+      url.pathname === '/api/catalog' &&
+      request.method === 'GET'
+    ) {
       return getCatalog(request, env);
     }
 
-    if (url.pathname === '/api/product' && request.method === 'GET') {
+    if (
+      url.pathname === '/api/product' &&
+      request.method === 'GET'
+    ) {
       return getProductPage(request, env, url);
     }
 
-    if (url.pathname === '/api/commission' && request.method === 'POST') {
+    if (
+      url.pathname === '/api/commission' &&
+      request.method === 'POST'
+    ) {
       return createCommission(request, env);
     }
 
-    if (url.pathname === '/api/create-checkout' && request.method === 'POST') {
+    if (
+      url.pathname === '/api/create-checkout' &&
+      request.method === 'POST'
+    ) {
       return createCheckout(request, env, url);
     }
 
-    if (url.pathname === '/api/order' && request.method === 'GET') {
+    if (
+      url.pathname === '/api/order' &&
+      request.method === 'GET'
+    ) {
       return getOrder(request, env, url);
     }
 
-    if (url.pathname === '/api/library' && request.method === 'GET') {
+    if (
+      url.pathname === '/api/library' &&
+      request.method === 'GET'
+    ) {
       return getLibrary(request, env);
     }
 
-    if (url.pathname === '/api/ownership' && request.method === 'GET') {
+    if (
+      url.pathname === '/api/ownership' &&
+      request.method === 'GET'
+    ) {
       return getOwnership(request, env, url);
     }
 
-    if (url.pathname === '/api/commercial-plans' && request.method === 'GET') {
+    if (
+      url.pathname === '/api/commercial-plans' &&
+      request.method === 'GET'
+    ) {
       return getCommercialPlans(request, env);
     }
 
-    if (url.pathname === '/api/commercial-status' && request.method === 'GET') {
+    if (
+      url.pathname === '/api/commercial-status' &&
+      request.method === 'GET'
+    ) {
       return getCommercialStatus(request, env);
     }
 
@@ -66,6 +96,20 @@ export default {
       request.method === 'POST'
     ) {
       return createBillingPortal(request, env, url);
+    }
+
+    if (
+      url.pathname === '/api/admin/commission-email' &&
+      request.method === 'POST'
+    ) {
+      return adminCommissionEmail(request, env);
+    }
+
+    if (
+      url.pathname === '/api/admin/commission-payment' &&
+      request.method === 'POST'
+    ) {
+      return adminCommissionPayment(request, env, url);
     }
 
     if (
@@ -93,19 +137,30 @@ async function removeProductAdmin(request, env) {
     const admin = await requireAdmin(request, env);
 
     if (!admin) {
-      return json({ error: 'Admin access required.' }, 403);
+      return json(
+        { error: 'Admin access required.' },
+        403
+      );
     }
 
     const body = await request.json();
-    const productId = String(body.productId || '');
+
+    const productId = String(
+      body.productId || ''
+    );
 
     if (!isUuid(productId)) {
-      return json({ error: 'Invalid product.' }, 400);
+      return json(
+        { error: 'Invalid product.' },
+        400
+      );
     }
 
     const orders = await supabaseRest(
       env,
-      `orders?product_id=eq.${encodeURIComponent(productId)}&select=id&limit=1`
+      `orders?product_id=eq.${encodeURIComponent(
+        productId
+      )}&select=id&limit=1`
     );
 
     if (orders.length) {
@@ -115,10 +170,12 @@ async function removeProductAdmin(request, env) {
         )}`,
         {
           method: 'PATCH',
+
           headers: serviceHeaders(env, {
             'content-type': 'application/json',
             prefer: 'return=minimal'
           }),
+
           body: JSON.stringify({
             status: 'hidden',
             updated_at: new Date().toISOString()
@@ -138,13 +195,17 @@ async function removeProductAdmin(request, env) {
       });
     }
 
-    for (const table of ['product_images', 'product_files']) {
+    for (const table of [
+      'product_images',
+      'product_files'
+    ]) {
       const response = await fetch(
         `${env.SUPABASE_URL}/rest/v1/${table}?product_id=eq.${encodeURIComponent(
           productId
         )}`,
         {
           method: 'DELETE',
+
           headers: serviceHeaders(env, {
             prefer: 'return=minimal'
           })
@@ -164,6 +225,7 @@ async function removeProductAdmin(request, env) {
       )}`,
       {
         method: 'DELETE',
+
         headers: serviceHeaders(env, {
           prefer: 'return=minimal'
         })
@@ -181,7 +243,10 @@ async function removeProductAdmin(request, env) {
       action: 'deleted'
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
@@ -198,10 +263,16 @@ async function shopState(request, env) {
       });
     }
 
-    const user = await requireAdmin(request, env);
+    const user = await requireAdmin(
+      request,
+      env
+    );
 
     if (!user) {
-      return json({ error: 'Shop not launched.' }, 404);
+      return json(
+        { error: 'Shop not launched.' },
+        404
+      );
     }
 
     return json({
@@ -209,7 +280,10 @@ async function shopState(request, env) {
       preview: true
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
@@ -218,13 +292,20 @@ async function getCatalog(request, env) {
     assertServerConfig(env);
 
     const live = isShopLive(env);
+
     let preview = false;
 
     if (!live) {
-      const user = await requireAdmin(request, env);
+      const user = await requireAdmin(
+        request,
+        env
+      );
 
       if (!user) {
-        return json({ error: 'Shop not launched.' }, 404);
+        return json(
+          { error: 'Shop not launched.' },
+          404
+        );
       }
 
       preview = true;
@@ -239,43 +320,64 @@ async function getCatalog(request, env) {
       `products?select=id,name,slug,category,description,personal_price_cents,commercial_price_cents,status,created_at,product_images(id,public_url,sort_order)&order=created_at.desc${statusFilter}`
     );
 
-    const products = rows.map(normalizeProductImages);
+    const products =
+      rows.map(normalizeProductImages);
 
     return json({
       preview,
       products
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
-async function getProductPage(request, env, url) {
+async function getProductPage(
+  request,
+  env,
+  url
+) {
   try {
     assertServerConfig(env);
 
-    const id = url.searchParams.get('id') || '';
+    const id =
+      url.searchParams.get('id') || '';
 
     if (!isUuid(id)) {
-      return json({ error: 'Invalid product.' }, 400);
+      return json(
+        { error: 'Invalid product.' },
+        400
+      );
     }
 
-    const live = isShopLive(env);
+    const live =
+      isShopLive(env);
+
     let preview = false;
 
     if (!live) {
-      const user = await requireAdmin(request, env);
+      const user = await requireAdmin(
+        request,
+        env
+      );
 
       if (!user) {
-        return json({ error: 'Shop not launched.' }, 404);
+        return json(
+          { error: 'Shop not launched.' },
+          404
+        );
       }
 
       preview = true;
     }
 
-    const statusFilter = live
-      ? '&status=eq.published'
-      : '';
+    const statusFilter =
+      live
+        ? '&status=eq.published'
+        : '';
 
     const rows = await supabaseRest(
       env,
@@ -285,90 +387,139 @@ async function getProductPage(request, env, url) {
     );
 
     if (!rows[0]) {
-      return json({ error: 'Product not found.' }, 404);
+      return json(
+        { error: 'Product not found.' },
+        404
+      );
     }
 
     return json({
       preview,
-      product: normalizeProductImages(rows[0])
+      product:
+        normalizeProductImages(
+          rows[0]
+        )
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
-async function createCommission(request, env) {
+async function createCommission(
+  request,
+  env
+) {
   try {
     assertServerConfig(env);
 
-    const live = isShopLive(env);
+    const live =
+      isShopLive(env);
 
     if (!live) {
-      const user = await requireAdmin(request, env);
+      const user = await requireAdmin(
+        request,
+        env
+      );
 
       if (!user) {
         return json(
-          { error: 'Commissions are not open yet.' },
+          {
+            error:
+              'Commissions are not open yet.'
+          },
           401
         );
       }
     }
 
-    const body = await request.json();
+    const body =
+      await request.json();
 
     if (body.website) {
-      return json({ ok: true });
+      return json({
+        ok: true
+      });
     }
 
-    const name = cleanText(body.name, 100);
-    const email = cleanText(
-      body.email,
-      200
-    ).toLowerCase();
+    const name =
+      cleanText(
+        body.name,
+        100
+      );
 
-    const projectType = cleanText(
-      body.projectType,
-      120
-    );
+    const email =
+      cleanText(
+        body.email,
+        200
+      ).toLowerCase();
+
+    const projectType =
+      cleanText(
+        body.projectType,
+        120
+      );
 
     const budget =
-      cleanText(body.budget, 100) || null;
+      cleanText(
+        body.budget,
+        100
+      ) || null;
 
-    const deadline = cleanDate(
-      body.deadline
-    );
+    const deadline =
+      cleanDate(
+        body.deadline
+      );
 
     const referenceLinks =
-      cleanText(body.referenceLinks, 1000) ||
-      null;
+      cleanText(
+        body.referenceLinks,
+        1000
+      ) || null;
 
-    const description = cleanText(
-      body.description,
-      5000
-    );
+    const description =
+      cleanText(
+        body.description,
+        5000
+      );
 
     if (name.length < 2) {
       return json(
-        { error: 'Please enter your name.' },
+        {
+          error:
+            'Please enter your name.'
+        },
         400
       );
     }
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
+    if (
+      !/^\S+@\S+\.\S+$/.test(email)
+    ) {
       return json(
-        { error: 'Please enter a valid email.' },
+        {
+          error:
+            'Please enter a valid email.'
+        },
         400
       );
     }
 
     if (!projectType) {
       return json(
-        { error: 'Please choose a project type.' },
+        {
+          error:
+            'Please choose a project type.'
+        },
         400
       );
     }
 
-    if (description.length < 10) {
+    if (
+      description.length < 10
+    ) {
       return json(
         {
           error:
@@ -378,28 +529,40 @@ async function createCommission(request, env) {
       );
     }
 
-    const response = await fetch(
-      `${env.SUPABASE_URL}/rest/v1/commission_requests`,
-      {
-        method: 'POST',
+    const response =
+      await fetch(
+        `${env.SUPABASE_URL}/rest/v1/commission_requests`,
+        {
+          method: 'POST',
 
-        headers: serviceHeaders(env, {
-          'content-type': 'application/json',
-          prefer: 'return=minimal'
-        }),
+          headers:
+            serviceHeaders(
+              env,
+              {
+                'content-type':
+                  'application/json',
 
-        body: JSON.stringify({
-          name,
-          email,
-          project_type: projectType,
-          budget,
-          desired_deadline: deadline,
-          reference_links: referenceLinks,
-          description,
-          status: 'new'
-        })
-      }
-    );
+                prefer:
+                  'return=minimal'
+              }
+            ),
+
+          body:
+            JSON.stringify({
+              name,
+              email,
+              project_type:
+                projectType,
+              budget,
+              desired_deadline:
+                deadline,
+              reference_links:
+                referenceLinks,
+              description,
+              status: 'new'
+            })
+        }
+      );
 
     if (!response.ok) {
       throw new Error(
@@ -407,34 +570,816 @@ async function createCommission(request, env) {
       );
     }
 
-    await sendCommissionNotification(env, {
-      name,
-      email,
-      projectType,
-      budget,
-      deadline,
-      referenceLinks,
-      description
-    });
+    await sendCommissionNotification(
+      env,
+      {
+        name,
+        email,
+        projectType,
+        budget,
+        deadline,
+        referenceLinks,
+        description
+      }
+    );
 
     return json({
       ok: true,
       emailed: true
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
-async function createCheckout(request, env, url) {
+async function adminCommissionEmail(
+  request,
+  env
+) {
+  try {
+    assertServerConfig(env);
+
+    const admin =
+      await requireAdmin(
+        request,
+        env
+      );
+
+    if (!admin) {
+      return json(
+        {
+          error:
+            'Admin access required.'
+        },
+        403
+      );
+    }
+
+    const body =
+      await request.json();
+
+    const commissionId =
+      String(
+        body.commissionId || ''
+      );
+
+    const subject =
+      cleanText(
+        body.subject,
+        180
+      );
+
+    const message =
+      cleanText(
+        body.message,
+        5000
+      );
+
+    if (!isUuid(commissionId)) {
+      return json(
+        {
+          error:
+            'Invalid commission request.'
+        },
+        400
+      );
+    }
+
+    if (!message) {
+      return json(
+        {
+          error:
+            'Write a message first.'
+        },
+        400
+      );
+    }
+
+    const commission =
+      await getCommissionRequest(
+        env,
+        commissionId
+      );
+
+    if (!commission) {
+      return json(
+        {
+          error:
+            'Commission request not found.'
+        },
+        404
+      );
+    }
+
+    await sendCommissionCustomerEmail(
+      env,
+      {
+        to:
+          commission.email,
+
+        customerName:
+          commission.name,
+
+        subject:
+          subject ||
+          `AFKProbably commission — ${
+            commission.project_type ||
+            commission.name
+          }`,
+
+        message
+      }
+    );
+
+    return json({
+      ok: true
+    });
+  } catch (error) {
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
+  }
+}
+
+async function adminCommissionPayment(
+  request,
+  env,
+  url
+) {
+  try {
+    assertServerConfig(env);
+
+    const admin =
+      await requireAdmin(
+        request,
+        env
+      );
+
+    if (!admin) {
+      return json(
+        {
+          error:
+            'Admin access required.'
+        },
+        403
+      );
+    }
+
+    const body =
+      await request.json();
+
+    const commissionId =
+      String(
+        body.commissionId || ''
+      );
+
+    const label =
+      cleanText(
+        body.label,
+        180
+      );
+
+    const amountCents =
+      Number(
+        body.amountCents
+      );
+
+    if (!isUuid(commissionId)) {
+      return json(
+        {
+          error:
+            'Invalid commission request.'
+        },
+        400
+      );
+    }
+
+    if (!label) {
+      return json(
+        {
+          error:
+            'Add a payment description.'
+        },
+        400
+      );
+    }
+
+    if (
+      !Number.isInteger(
+        amountCents
+      ) ||
+      amountCents < 50
+    ) {
+      return json(
+        {
+          error:
+            'Payment amount must be at least $0.50.'
+        },
+        400
+      );
+    }
+
+    const commission =
+      await getCommissionRequest(
+        env,
+        commissionId
+      );
+
+    if (!commission) {
+      return json(
+        {
+          error:
+            'Commission request not found.'
+        },
+        404
+      );
+    }
+
+    const paymentCreate =
+      await fetch(
+        `${env.SUPABASE_URL}/rest/v1/commission_payments`,
+        {
+          method: 'POST',
+
+          headers:
+            serviceHeaders(
+              env,
+              {
+                'content-type':
+                  'application/json',
+
+                prefer:
+                  'return=representation'
+              }
+            ),
+
+          body:
+            JSON.stringify({
+              commission_id:
+                commissionId,
+
+              label,
+
+              amount_cents:
+                amountCents,
+
+              status:
+                'unpaid'
+            })
+        }
+      );
+
+    const createdRows =
+      await paymentCreate
+        .json()
+        .catch(() => []);
+
+    if (
+      !paymentCreate.ok ||
+      !createdRows?.[0]?.id
+    ) {
+      throw new Error(
+        `Could not create commission payment: ${
+          Array.isArray(
+            createdRows
+          )
+            ? 'No payment row returned.'
+            : createdRows?.message ||
+              createdRows?.error ||
+              'Database error.'
+        }`
+      );
+    }
+
+    const payment =
+      createdRows[0];
+
+    const params =
+      new URLSearchParams();
+
+    params.set(
+      'mode',
+      'payment'
+    );
+
+    params.set(
+      'managed_payments[enabled]',
+      'false'
+    );
+
+    params.set(
+      'success_url',
+      `${url.origin}/commissions.html?payment=success`
+    );
+
+    params.set(
+      'cancel_url',
+      `${url.origin}/commissions.html?payment=cancelled`
+    );
+
+    params.set(
+      'customer_email',
+      commission.email
+    );
+
+    params.set(
+      'line_items[0][quantity]',
+      '1'
+    );
+
+    params.set(
+      'line_items[0][price_data][currency]',
+      'usd'
+    );
+
+    params.set(
+      'line_items[0][price_data][unit_amount]',
+      String(amountCents)
+    );
+
+    params.set(
+      'line_items[0][price_data][product_data][name]',
+      `AFKProbably Commission — ${label}`
+    );
+
+    params.set(
+      'line_items[0][price_data][product_data][description]',
+      `Commission payment for ${commission.name}.`
+    );
+
+    params.set(
+      'metadata[afk_commission]',
+      '1'
+    );
+
+    params.set(
+      'metadata[commission_id]',
+      commissionId
+    );
+
+    params.set(
+      'metadata[commission_payment_id]',
+      payment.id
+    );
+
+    const stripeResponse =
+      await fetch(
+        'https://api.stripe.com/v1/checkout/sessions',
+        {
+          method: 'POST',
+
+          headers: {
+            authorization:
+              `Bearer ${stripeSecretKey(
+                env
+              )}`,
+
+            'content-type':
+              'application/x-www-form-urlencoded'
+          },
+
+          body:
+            params
+        }
+      );
+
+    const session =
+      await stripeResponse.json();
+
+    if (
+      !stripeResponse.ok ||
+      !session?.id ||
+      !session?.url
+    ) {
+      await patchCommissionPayment(
+        env,
+        payment.id,
+        {
+          status:
+            'cancelled',
+
+          updated_at:
+            new Date()
+              .toISOString()
+        }
+      );
+
+      return json(
+        {
+          error:
+            session?.error?.message ||
+            'Stripe could not create the commission checkout.'
+        },
+        502
+      );
+    }
+
+    await patchCommissionPayment(
+      env,
+      payment.id,
+      {
+        stripe_checkout_session_id:
+          session.id,
+
+        stripe_checkout_url:
+          session.url,
+
+        updated_at:
+          new Date()
+            .toISOString()
+      }
+    );
+
+    try {
+      await sendCommissionPaymentEmail(
+        env,
+        {
+          to:
+            commission.email,
+
+          customerName:
+            commission.name,
+
+          label,
+
+          amountCents,
+
+          checkoutUrl:
+            session.url
+        }
+      );
+    } catch (emailError) {
+      return json(
+        {
+          error:
+            `Stripe checkout was created, but the email failed: ${safeMessage(
+              emailError
+            )}. Open the commission in Admin and use the saved checkout link.`
+        },
+        502
+      );
+    }
+
+    return json({
+      ok: true,
+
+      paymentId:
+        payment.id,
+
+      checkoutUrl:
+        session.url,
+
+      amountCents
+    });
+  } catch (error) {
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
+  }
+}
+
+async function getCommissionRequest(
+  env,
+  id
+) {
+  const rows =
+    await supabaseRest(
+      env,
+      `commission_requests?id=eq.${encodeURIComponent(
+        id
+      )}&select=id,name,email,project_type,status&limit=1`
+    );
+
+  return rows[0] || null;
+}
+
+async function patchCommissionPayment(
+  env,
+  id,
+  patch
+) {
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/commission_payments?id=eq.${encodeURIComponent(
+        id
+      )}`,
+      {
+        method: 'PATCH',
+
+        headers:
+          serviceHeaders(
+            env,
+            {
+              'content-type':
+                'application/json',
+
+              prefer:
+                'return=minimal'
+            }
+          ),
+
+        body:
+          JSON.stringify(
+            patch
+          )
+      }
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not update commission payment: ${await response.text()}`
+    );
+  }
+}
+
+async function markCommissionPaymentPaid(
+  env,
+  session
+) {
+  const paymentId =
+    String(
+      session?.metadata
+        ?.commission_payment_id ||
+      ''
+    );
+
+  if (!isUuid(paymentId)) {
+    throw new Error(
+      'Commission payment metadata is incomplete.'
+    );
+  }
+
+  await patchCommissionPayment(
+    env,
+    paymentId,
+    {
+      status:
+        'paid',
+
+      stripe_checkout_session_id:
+        session.id,
+
+      paid_at:
+        new Date()
+          .toISOString(),
+
+      updated_at:
+        new Date()
+          .toISOString()
+    }
+  );
+}
+
+async function sendCommissionCustomerEmail(
+  env,
+  {
+    to,
+    customerName,
+    subject,
+    message
+  }
+) {
+  const safeName =
+    cleanText(
+      customerName,
+      100
+    ) || 'there';
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#24123a">
+      <p>Hi ${escapeHtml(safeName)},</p>
+      <p style="white-space:pre-wrap">${escapeHtml(message)}</p>
+      <p style="margin-top:24px">— AFKProbably Commissions</p>
+    </div>
+  `;
+
+  return sendResendEmail(
+    env,
+    {
+      to,
+      subject,
+
+      text:
+        `Hi ${safeName}\n\n${message}\n\n— AFKProbably Commissions`,
+
+      html
+    }
+  );
+}
+
+async function sendCommissionPaymentEmail(
+  env,
+  {
+    to,
+    customerName,
+    label,
+    amountCents,
+    checkoutUrl
+  }
+) {
+  const safeName =
+    cleanText(
+      customerName,
+      100
+    ) || 'there';
+
+  const amount =
+    `$${(
+      Number(amountCents) /
+      100
+    ).toFixed(2)}`;
+
+  const text = [
+    `Hi ${safeName},`,
+    '',
+    'Your AFKProbably commission payment is ready.',
+    '',
+    `${label}: ${amount}`,
+    '',
+    `Pay securely with Stripe: ${checkoutUrl}`,
+    '',
+    'If you have any questions, reply to this email.',
+    '',
+    '— AFKProbably Commissions'
+  ].join('\n');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#24123a">
+      <p>Hi ${escapeHtml(safeName)},</p>
+
+      <p>
+        Your AFKProbably commission payment is ready.
+      </p>
+
+      <p>
+        <strong>${escapeHtml(label)}:</strong>
+        ${escapeHtml(amount)}
+      </p>
+
+      <p style="margin:24px 0">
+        <a
+          href="${escapeHtml(checkoutUrl)}"
+          style="display:inline-block;padding:12px 18px;border-radius:999px;background:#6b20df;color:#fff;text-decoration:none;font-weight:700"
+        >
+          Pay commission securely
+        </a>
+      </p>
+
+      <p>
+        If you have any questions, reply to this email.
+      </p>
+
+      <p>
+        — AFKProbably Commissions
+      </p>
+    </div>
+  `;
+
+  return sendResendEmail(
+    env,
+    {
+      to,
+
+      subject:
+        `AFKProbably commission payment — ${label}`,
+
+      text,
+      html
+    }
+  );
+}
+
+async function sendResendEmail(
+  env,
+  {
+    to,
+    subject,
+    text,
+    html
+  }
+) {
+  const apiKey =
+    String(
+      env.RESEND_API_KEY ||
+      ''
+    ).trim();
+
+  const from =
+    String(
+      env.COMMISSION_FROM_EMAIL ||
+      'AFKProbably Commissions <onboarding@resend.dev>'
+    ).trim();
+
+  const replyTo =
+    String(
+      env.COMMISSION_EMAIL ||
+      ''
+    ).trim();
+
+  if (!apiKey) {
+    throw new Error(
+      'RESEND_API_KEY is missing.'
+    );
+  }
+
+  if (
+    !to ||
+    !/^\S+@\S+\.\S+$/.test(
+      String(to)
+    )
+  ) {
+    throw new Error(
+      'Customer email is invalid.'
+    );
+  }
+
+  const response =
+    await fetch(
+      'https://api.resend.com/emails',
+      {
+        method: 'POST',
+
+        headers: {
+          authorization:
+            `Bearer ${apiKey}`,
+
+          'content-type':
+            'application/json'
+        },
+
+        body:
+          JSON.stringify({
+            from,
+
+            to: [
+              String(to)
+                .trim()
+                .toLowerCase()
+            ],
+
+            ...(replyTo
+              ? {
+                  reply_to:
+                    replyTo
+                }
+              : {}),
+
+            subject,
+            text,
+            html
+          })
+      }
+    );
+
+  const raw =
+    await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `Commission email failed (${response.status}): ${raw}`
+    );
+  }
+
+  let result = null;
+
+  try {
+    result =
+      raw
+        ? JSON.parse(raw)
+        : null;
+  } catch {}
+
+  if (!result?.id) {
+    throw new Error(
+      `Commission email was not confirmed by Resend: ${
+        raw ||
+        'empty response'
+      }`
+    );
+  }
+
+  return result.id;
+}
+
+async function createCheckout(
+  request,
+  env,
+  url
+) {
   try {
     assertServerConfig(env);
 
     if (!isShopLive(env)) {
-      const user = await requireAdmin(
-        request,
-        env
-      );
+      const user =
+        await requireAdmin(
+          request,
+          env
+        );
 
       if (!user) {
         return json(
@@ -447,36 +1392,47 @@ async function createCheckout(request, env, url) {
       }
     }
 
-    const body = await request.json();
+    const body =
+      await request.json();
 
-    const productId = String(
-      body.productId || ''
-    );
+    const productId =
+      String(
+        body.productId || ''
+      );
 
-    const licenseType = 'personal';
+    const licenseType =
+      'personal';
 
     if (!isUuid(productId)) {
       return json(
-        { error: 'Invalid product.' },
+        {
+          error:
+            'Invalid product.'
+        },
         400
       );
     }
 
-    const product = await getProduct(
-      env,
-      productId
-    );
+    const product =
+      await getProduct(
+        env,
+        productId
+      );
 
     if (!product) {
       return json(
-        { error: 'Product not found.' },
+        {
+          error:
+            'Product not found.'
+        },
         404
       );
     }
 
     if (
       isShopLive(env) &&
-      product.status !== 'published'
+      product.status !==
+        'published'
     ) {
       return json(
         {
@@ -506,7 +1462,10 @@ async function createCheckout(request, env, url) {
     const params =
       new URLSearchParams();
 
-    params.set('mode', 'payment');
+    params.set(
+      'mode',
+      'payment'
+    );
 
     params.set(
       'managed_payments[enabled]',
@@ -567,22 +1526,26 @@ async function createCheckout(request, env, url) {
       licenseType
     );
 
-    const stripeResponse = await fetch(
-      'https://api.stripe.com/v1/checkout/sessions',
-      {
-        method: 'POST',
+    const stripeResponse =
+      await fetch(
+        'https://api.stripe.com/v1/checkout/sessions',
+        {
+          method: 'POST',
 
-        headers: {
-          authorization: `Bearer ${stripeSecretKey(
-            env
-          )}`,
-          'content-type':
-            'application/x-www-form-urlencoded'
-        },
+          headers: {
+            authorization:
+              `Bearer ${stripeSecretKey(
+                env
+              )}`,
 
-        body: params
-      }
-    );
+            'content-type':
+              'application/x-www-form-urlencoded'
+          },
+
+          body:
+            params
+        }
+      );
 
     const session =
       await stripeResponse.json();
@@ -599,23 +1562,35 @@ async function createCheckout(request, env, url) {
     }
 
     return json({
-      url: session.url
+      url:
+        session.url
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
-async function getOrder(_request, env, url) {
+async function getOrder(
+  _request,
+  env,
+  url
+) {
   try {
     assertServerConfig(env);
 
     const sessionId =
-      url.searchParams.get('session_id');
+      url.searchParams.get(
+        'session_id'
+      );
 
     if (
       !sessionId ||
-      !sessionId.startsWith('cs_')
+      !sessionId.startsWith(
+        'cs_'
+      )
     ) {
       return json(
         {
@@ -626,18 +1601,20 @@ async function getOrder(_request, env, url) {
       );
     }
 
-    const stripeResponse = await fetch(
-      `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(
-        sessionId
-      )}`,
-      {
-        headers: {
-          authorization: `Bearer ${stripeSecretKey(
-            env
-          )}`
+    const stripeResponse =
+      await fetch(
+        `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(
+          sessionId
+        )}`,
+        {
+          headers: {
+            authorization:
+              `Bearer ${stripeSecretKey(
+                env
+              )}`
+          }
         }
-      }
-    );
+      );
 
     const session =
       await stripeResponse.json();
@@ -654,7 +1631,8 @@ async function getOrder(_request, env, url) {
     }
 
     if (
-      session.payment_status !== 'paid'
+      session.payment_status !==
+      'paid'
     ) {
       return json(
         {
@@ -666,14 +1644,19 @@ async function getOrder(_request, env, url) {
     }
 
     const productId =
-      session.metadata?.product_id;
+      session.metadata
+        ?.product_id;
 
     const licenseType =
-      session.metadata?.license_type;
+      session.metadata
+        ?.license_type;
 
     if (
       !isUuid(productId) ||
-      !['personal', 'commercial'].includes(
+      ![
+        'personal',
+        'commercial'
+      ].includes(
         licenseType
       )
     ) {
@@ -686,10 +1669,11 @@ async function getOrder(_request, env, url) {
       );
     }
 
-    const product = await getProduct(
-      env,
-      productId
-    );
+    const product =
+      await getProduct(
+        env,
+        productId
+      );
 
     if (!product) {
       return json(
@@ -701,50 +1685,76 @@ async function getOrder(_request, env, url) {
       );
     }
 
-    await upsertOrder(env, session);
-
-    const files = await getProductFiles(
+    await upsertOrder(
       env,
-      productId
+      session
     );
+
+    const files =
+      await getProductFiles(
+        env,
+        productId
+      );
 
     const downloads = [];
 
-    for (const file of files) {
+    for (
+      const file of files
+    ) {
       downloads.push({
-        name: file.original_name,
-        url: await createSignedDownload(
-          env,
-          file.storage_path
-        )
+        name:
+          file.original_name,
+
+        url:
+          await createSignedDownload(
+            env,
+            file.storage_path
+          )
       });
     }
 
     return json({
       paid: true,
-      product: product.name,
+
+      product:
+        product.name,
+
       licenseType,
-      amountTotal: session.amount_total,
+
+      amountTotal:
+        session.amount_total,
+
       customerEmail:
-        session.customer_details?.email ||
+        session.customer_details
+          ?.email ||
         session.customer_email ||
         null,
+
       downloads,
-      expiresInSeconds: 600
+
+      expiresInSeconds:
+        600
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
-async function getLibrary(request, env) {
+async function getLibrary(
+  request,
+  env
+) {
   try {
     assertServerConfig(env);
 
-    const user = await requireUser(
-      request,
-      env
-    );
+    const user =
+      await requireUser(
+        request,
+        env
+      );
 
     if (!user?.email) {
       return json(
@@ -756,24 +1766,35 @@ async function getLibrary(request, env) {
       );
     }
 
-    const email = String(user.email)
-      .trim()
-      .toLowerCase();
+    const email =
+      String(
+        user.email
+      )
+        .trim()
+        .toLowerCase();
 
-    const orders = await supabaseRest(
-      env,
-      `orders?customer_email=ilike.${encodeURIComponent(
-        email
-      )}&payment_status=eq.paid&select=id,product_id,license_type,amount_total_cents,created_at,products(id,name,slug,category,description,product_images(id,public_url,sort_order))&order=created_at.desc`
-    );
+    const orders =
+      await supabaseRest(
+        env,
+        `orders?customer_email=ilike.${encodeURIComponent(
+          email
+        )}&payment_status=eq.paid&select=id,product_id,license_type,amount_total_cents,created_at,products(id,name,slug,category,description,product_images(id,public_url,sort_order))&order=created_at.desc`
+      );
 
-    const seen = new Set();
+    const seen =
+      new Set();
+
     const purchases = [];
 
-    for (const order of orders) {
-      const key = `${order.product_id}:${order.license_type}`;
+    for (
+      const order of orders
+    ) {
+      const key =
+        `${order.product_id}:${order.license_type}`;
 
-      if (seen.has(key)) {
+      if (
+        seen.has(key)
+      ) {
         continue;
       }
 
@@ -798,9 +1819,13 @@ async function getLibrary(request, env) {
 
       const downloads = [];
 
-      for (const file of files) {
+      for (
+        const file of files
+      ) {
         downloads.push({
-          name: file.original_name,
+          name:
+            file.original_name,
+
           url:
             await createSignedDownload(
               env,
@@ -811,12 +1836,16 @@ async function getLibrary(request, env) {
 
       purchases.push({
         product,
+
         licenseType:
           order.license_type,
+
         amountTotal:
           order.amount_total_cents,
+
         purchasedAt:
           order.created_at,
+
         downloads
       });
     }
@@ -824,10 +1853,14 @@ async function getLibrary(request, env) {
     return json({
       email,
       purchases,
-      expiresInSeconds: 600
+      expiresInSeconds:
+        600
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
@@ -839,10 +1872,11 @@ async function getOwnership(
   try {
     assertServerConfig(env);
 
-    const user = await requireUser(
-      request,
-      env
-    );
+    const user =
+      await requireUser(
+        request,
+        env
+      );
 
     if (!user?.email) {
       return json({
@@ -858,29 +1892,37 @@ async function getOwnership(
 
     if (!isUuid(productId)) {
       return json(
-        { error: 'Invalid product.' },
+        {
+          error:
+            'Invalid product.'
+        },
         400
       );
     }
 
-    const email = String(user.email)
-      .trim()
-      .toLowerCase();
+    const email =
+      String(
+        user.email
+      )
+        .trim()
+        .toLowerCase();
 
-    const rows = await supabaseRest(
-      env,
-      `orders?customer_email=ilike.${encodeURIComponent(
-        email
-      )}&product_id=eq.${encodeURIComponent(
-        productId
-      )}&payment_status=eq.paid&select=license_type`
-    );
+    const rows =
+      await supabaseRest(
+        env,
+        `orders?customer_email=ilike.${encodeURIComponent(
+          email
+        )}&product_id=eq.${encodeURIComponent(
+          productId
+        )}&payment_status=eq.paid&select=license_type`
+      );
 
     const owned = [
       ...new Set(
         rows
           .map(
-            row => row.license_type
+            row =>
+              row.license_type
           )
           .filter(type =>
             [
@@ -896,7 +1938,10 @@ async function getOwnership(
       owned
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
@@ -907,14 +1952,17 @@ async function getCommercialPlans(
   try {
     assertServerConfig(env);
 
-    const live = isShopLive(env);
+    const live =
+      isShopLive(env);
+
     let preview = false;
 
     if (!live) {
-      const admin = await requireAdmin(
-        request,
-        env
-      );
+      const admin =
+        await requireAdmin(
+          request,
+          env
+        );
 
       if (!admin) {
         return json(
@@ -929,31 +1977,37 @@ async function getCommercialPlans(
       preview = true;
     }
 
-    const rows = await supabaseRest(
-      env,
-      'commercial_license_plans?select=plan_type,price_cents,active&order=plan_type.asc'
-    );
-
-    const plans = rows
-      .filter(
-        row =>
-          preview ||
-          row.active
-      )
-      .filter(
-        row =>
-          Number.isInteger(
-            row.price_cents
-          ) &&
-          row.price_cents >= 50
+    const rows =
+      await supabaseRest(
+        env,
+        'commercial_license_plans?select=plan_type,price_cents,active&order=plan_type.asc'
       );
+
+    const plans =
+      rows
+        .filter(
+          row =>
+            preview ||
+            row.active
+        )
+        .filter(
+          row =>
+            Number.isInteger(
+              row.price_cents
+            ) &&
+            row.price_cents >=
+              50
+        );
 
     return json({
       preview,
       plans
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
@@ -964,10 +2018,11 @@ async function getCommercialStatus(
   try {
     assertServerConfig(env);
 
-    const user = await requireUser(
-      request,
-      env
-    );
+    const user =
+      await requireUser(
+        request,
+        env
+      );
 
     if (!user?.email) {
       return json(
@@ -979,23 +2034,28 @@ async function getCommercialStatus(
       );
     }
 
-    const email = String(user.email)
-      .trim()
-      .toLowerCase();
+    const email =
+      String(
+        user.email
+      )
+        .trim()
+        .toLowerCase();
 
-    const rows = await supabaseRest(
-      env,
-      `commercial_licenses?customer_email=ilike.${encodeURIComponent(
-        email
-      )}&select=id,plan_type,status,current_period_end,stripe_customer_id,stripe_subscription_id,created_at&order=created_at.desc`
-    );
+    const rows =
+      await supabaseRest(
+        env,
+        `commercial_licenses?customer_email=ilike.${encodeURIComponent(
+          email
+        )}&select=id,plan_type,status,current_period_end,stripe_customer_id,stripe_subscription_id,created_at&order=created_at.desc`
+      );
 
     const lifetimeRow =
       rows.find(
         row =>
           row.plan_type ===
             'lifetime' &&
-          row.status === 'active'
+          row.status ===
+            'active'
       );
 
     let monthlyRow =
@@ -1006,20 +2066,23 @@ async function getCommercialStatus(
       ) || null;
 
     if (
-      monthlyRow?.stripe_subscription_id
+      monthlyRow
+        ?.stripe_subscription_id
     ) {
-      const response = await fetch(
-        `https://api.stripe.com/v1/subscriptions/${encodeURIComponent(
-          monthlyRow.stripe_subscription_id
-        )}`,
-        {
-          headers: {
-            authorization: `Bearer ${stripeSecretKey(
-              env
-            )}`
+      const response =
+        await fetch(
+          `https://api.stripe.com/v1/subscriptions/${encodeURIComponent(
+            monthlyRow.stripe_subscription_id
+          )}`,
+          {
+            headers: {
+              authorization:
+                `Bearer ${stripeSecretKey(
+                  env
+                )}`
+            }
           }
-        }
-      );
+        );
 
       if (response.ok) {
         const subscription =
@@ -1027,6 +2090,7 @@ async function getCommercialStatus(
 
         monthlyRow = {
           ...monthlyRow,
+
           status:
             subscription.status,
 
@@ -1055,44 +2119,54 @@ async function getCommercialStatus(
               monthlyRow.stripe_customer_id,
 
             updated_at:
-              new Date().toISOString()
+              new Date()
+                .toISOString()
           }
         );
       }
     }
 
-    const monthlyActive = Boolean(
-      monthlyRow &&
-        ['active', 'trialing'].includes(
+    const monthlyActive =
+      Boolean(
+        monthlyRow &&
+        [
+          'active',
+          'trialing'
+        ].includes(
           monthlyRow.status
         )
-    );
+      );
 
     return json({
-      lifetime: Boolean(
-        lifetimeRow
-      ),
+      lifetime:
+        Boolean(
+          lifetimeRow
+        ),
 
-      monthly: monthlyRow
-        ? {
-            active:
-              monthlyActive,
+      monthly:
+        monthlyRow
+          ? {
+              active:
+                monthlyActive,
 
-            status:
-              monthlyRow.status,
+              status:
+                monthlyRow.status,
 
-            currentPeriodEnd:
-              monthlyRow.current_period_end,
+              currentPeriodEnd:
+                monthlyRow.current_period_end,
 
-            canManage:
-              Boolean(
-                monthlyRow.stripe_customer_id
-              )
-          }
-        : null
+              canManage:
+                Boolean(
+                  monthlyRow.stripe_customer_id
+                )
+            }
+          : null
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
@@ -1104,10 +2178,11 @@ async function createCommercialCheckout(
   try {
     assertServerConfig(env);
 
-    const user = await requireUser(
-      request,
-      env
-    );
+    const user =
+      await requireUser(
+        request,
+        env
+      );
 
     if (!user?.email) {
       return json(
@@ -1120,10 +2195,11 @@ async function createCommercialCheckout(
     }
 
     if (!isShopLive(env)) {
-      const admin = await requireAdmin(
-        request,
-        env
-      );
+      const admin =
+        await requireAdmin(
+          request,
+          env
+        );
 
       if (!admin) {
         return json(
@@ -1140,7 +2216,8 @@ async function createCommercialCheckout(
       await request.json();
 
     const planType =
-      body.planType === 'monthly'
+      body.planType ===
+      'monthly'
         ? 'monthly'
         : body.planType ===
             'lifetime'
@@ -1163,9 +2240,13 @@ async function createCommercialCheckout(
         `commercial_license_plans?plan_type=eq.${planType}&select=plan_type,price_cents,active`
       );
 
-    const plan = plans[0];
+    const plan =
+      plans[0];
 
-    if (!plan || !plan.active) {
+    if (
+      !plan ||
+      !plan.active
+    ) {
       return json(
         {
           error:
@@ -1179,7 +2260,8 @@ async function createCommercialCheckout(
       !Number.isInteger(
         plan.price_cents
       ) ||
-      plan.price_cents < 50
+      plan.price_cents <
+        50
     ) {
       return json(
         {
@@ -1190,9 +2272,12 @@ async function createCommercialCheckout(
       );
     }
 
-    const email = String(user.email)
-      .trim()
-      .toLowerCase();
+    const email =
+      String(
+        user.email
+      )
+        .trim()
+        .toLowerCase();
 
     const params =
       new URLSearchParams();
@@ -1243,7 +2328,8 @@ async function createCommercialCheckout(
 
     params.set(
       'line_items[0][price_data][product_data][name]',
-      planType === 'monthly'
+      planType ===
+        'monthly'
         ? 'AFKProbably Monthly Commercial License'
         : 'AFKProbably Lifetime Commercial License'
     );
@@ -1253,14 +2339,20 @@ async function createCommercialCheckout(
       'Shop-wide commercial rights for physical prints made from AFKProbably meshes purchased by this account. Digital file redistribution is not included.'
     );
 
-    if (planType === 'monthly') {
+    if (
+      planType ===
+      'monthly'
+    ) {
       params.set(
         'line_items[0][price_data][recurring][interval]',
         'month'
       );
     }
 
-    if (planType === 'lifetime') {
+    if (
+      planType ===
+      'lifetime'
+    ) {
       params.set(
         'customer_creation',
         'always'
@@ -1282,7 +2374,10 @@ async function createCommercialCheckout(
       email
     );
 
-    if (planType === 'monthly') {
+    if (
+      planType ===
+      'monthly'
+    ) {
       params.set(
         'subscription_data[metadata][afk_commercial]',
         '1'
@@ -1306,15 +2401,17 @@ async function createCommercialCheckout(
           method: 'POST',
 
           headers: {
-            authorization: `Bearer ${stripeSecretKey(
-              env
-            )}`,
+            authorization:
+              `Bearer ${stripeSecretKey(
+                env
+              )}`,
 
             'content-type':
               'application/x-www-form-urlencoded'
           },
 
-          body: params
+          body:
+            params
         }
       );
 
@@ -1333,10 +2430,14 @@ async function createCommercialCheckout(
     }
 
     return json({
-      url: session.url
+      url:
+        session.url
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
@@ -1348,10 +2449,11 @@ async function getCommercialLicenseResult(
   try {
     assertServerConfig(env);
 
-    const user = await requireUser(
-      request,
-      env
-    );
+    const user =
+      await requireUser(
+        request,
+        env
+      );
 
     if (!user?.email) {
       return json(
@@ -1368,7 +2470,11 @@ async function getCommercialLicenseResult(
         'session_id'
       ) || '';
 
-    if (!sessionId.startsWith('cs_')) {
+    if (
+      !sessionId.startsWith(
+        'cs_'
+      )
+    ) {
       return json(
         {
           error:
@@ -1378,18 +2484,20 @@ async function getCommercialLicenseResult(
       );
     }
 
-    const response = await fetch(
-      `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(
-        sessionId
-      )}`,
-      {
-        headers: {
-          authorization: `Bearer ${stripeSecretKey(
-            env
-          )}`
+    const response =
+      await fetch(
+        `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(
+          sessionId
+        )}`,
+        {
+          headers: {
+            authorization:
+              `Bearer ${stripeSecretKey(
+                env
+              )}`
+          }
         }
-      }
-    );
+      );
 
     const session =
       await response.json();
@@ -1407,7 +2515,8 @@ async function getCommercialLicenseResult(
 
     if (
       session.metadata
-        ?.afk_commercial !== '1'
+        ?.afk_commercial !==
+      '1'
     ) {
       return json(
         {
@@ -1419,7 +2528,8 @@ async function getCommercialLicenseResult(
     }
 
     const planType =
-      session.metadata?.plan_type;
+      session.metadata
+        ?.plan_type;
 
     if (
       ![
@@ -1436,26 +2546,31 @@ async function getCommercialLicenseResult(
       );
     }
 
-    const checkoutEmail = String(
-      session.customer_details
-        ?.email ||
-        session.customer_email ||
+    const checkoutEmail =
+      String(
+        session
+          .customer_details
+          ?.email ||
+        session
+          .customer_email ||
         session.metadata
           ?.customer_email ||
         ''
-    )
-      .trim()
-      .toLowerCase();
+      )
+        .trim()
+        .toLowerCase();
 
-    const userEmail = String(
-      user.email
-    )
-      .trim()
-      .toLowerCase();
+    const userEmail =
+      String(
+        user.email
+      )
+        .trim()
+        .toLowerCase();
 
     if (
       !checkoutEmail ||
-      checkoutEmail !== userEmail
+      checkoutEmail !==
+        userEmail
     ) {
       return json(
         {
@@ -1468,8 +2583,13 @@ async function getCommercialLicenseResult(
 
     let record;
 
-    if (planType === 'monthly') {
-      if (!session.subscription) {
+    if (
+      planType ===
+      'monthly'
+    ) {
+      if (
+        !session.subscription
+      ) {
         return json(
           {
             error:
@@ -1490,21 +2610,25 @@ async function getCommercialLicenseResult(
         ![
           'active',
           'trialing'
-        ].includes(record.status)
+        ].includes(
+          record.status
+        )
       ) {
         return json(
           {
-            error: `Subscription is ${
-              record.status ||
-              'not active'
-            }.`
+            error:
+              `Subscription is ${
+                record.status ||
+                'not active'
+              }.`
           },
           402
         );
       }
     } else {
       if (
-        session.payment_status !==
+        session
+          .payment_status !==
         'paid'
       ) {
         return json(
@@ -1535,7 +2659,8 @@ async function getCommercialLicenseResult(
         stripe_subscription_id:
           null,
 
-        status: 'active',
+        status:
+          'active',
 
         current_period_end:
           null
@@ -1549,15 +2674,20 @@ async function getCommercialLicenseResult(
 
     return json({
       active: true,
+
       planType,
 
       planLabel:
-        planType === 'monthly'
+        planType ===
+        'monthly'
           ? 'Monthly Commercial License'
           : 'Lifetime Commercial License'
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
@@ -1569,10 +2699,11 @@ async function createBillingPortal(
   try {
     assertServerConfig(env);
 
-    const user = await requireUser(
-      request,
-      env
-    );
+    const user =
+      await requireUser(
+        request,
+        env
+      );
 
     if (!user?.email) {
       return json(
@@ -1584,19 +2715,24 @@ async function createBillingPortal(
       );
     }
 
-    const email = String(user.email)
-      .trim()
-      .toLowerCase();
+    const email =
+      String(
+        user.email
+      )
+        .trim()
+        .toLowerCase();
 
-    const rows = await supabaseRest(
-      env,
-      `commercial_licenses?customer_email=ilike.${encodeURIComponent(
-        email
-      )}&stripe_customer_id=not.is.null&select=stripe_customer_id,created_at&order=created_at.desc&limit=1`
-    );
+    const rows =
+      await supabaseRest(
+        env,
+        `commercial_licenses?customer_email=ilike.${encodeURIComponent(
+          email
+        )}&stripe_customer_id=not.is.null&select=stripe_customer_id,created_at&order=created_at.desc&limit=1`
+      );
 
     const customerId =
-      rows[0]?.stripe_customer_id;
+      rows[0]
+        ?.stripe_customer_id;
 
     if (!customerId) {
       return json(
@@ -1621,23 +2757,26 @@ async function createBillingPortal(
       `${url.origin}/commercial.html`
     );
 
-    const response = await fetch(
-      'https://api.stripe.com/v1/billing_portal/sessions',
-      {
-        method: 'POST',
+    const response =
+      await fetch(
+        'https://api.stripe.com/v1/billing_portal/sessions',
+        {
+          method: 'POST',
 
-        headers: {
-          authorization: `Bearer ${stripeSecretKey(
-            env
-          )}`,
+          headers: {
+            authorization:
+              `Bearer ${stripeSecretKey(
+                env
+              )}`,
 
-          'content-type':
-            'application/x-www-form-urlencoded'
-        },
+            'content-type':
+              'application/x-www-form-urlencoded'
+          },
 
-        body: params
-      }
-    );
+          body:
+            params
+        }
+      );
 
     const portal =
       await response.json();
@@ -1654,10 +2793,14 @@ async function createBillingPortal(
     }
 
     return json({
-      url: portal.url
+      url:
+        portal.url
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 500);
+    return json(
+      { error: safeMessage(error) },
+      500
+    );
   }
 }
 
@@ -1666,18 +2809,20 @@ async function commercialRecordFromSubscription(
   session,
   email
 ) {
-  const response = await fetch(
-    `https://api.stripe.com/v1/subscriptions/${encodeURIComponent(
-      session.subscription
-    )}`,
-    {
-      headers: {
-        authorization: `Bearer ${stripeSecretKey(
-          env
-        )}`
+  const response =
+    await fetch(
+      `https://api.stripe.com/v1/subscriptions/${encodeURIComponent(
+        session.subscription
+      )}`,
+      {
+        headers: {
+          authorization:
+            `Bearer ${stripeSecretKey(
+              env
+            )}`
+        }
       }
-    }
-  );
+    );
 
   const subscription =
     await response.json();
@@ -1685,13 +2830,16 @@ async function commercialRecordFromSubscription(
   if (!response.ok) {
     throw new Error(
       subscription?.error?.message ||
-        'Could not verify subscription.'
+      'Could not verify subscription.'
     );
   }
 
   return {
-    customer_email: email,
-    plan_type: 'monthly',
+    customer_email:
+      email,
+
+    plan_type:
+      'monthly',
 
     stripe_checkout_session_id:
       session.id,
@@ -1723,27 +2871,36 @@ async function upsertCommercialLicense(
 ) {
   const payload = {
     ...record,
+
     updated_at:
-      new Date().toISOString()
+      new Date()
+        .toISOString()
   };
 
-  const response = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/commercial_licenses?on_conflict=stripe_checkout_session_id`,
-    {
-      method: 'POST',
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/commercial_licenses?on_conflict=stripe_checkout_session_id`,
+      {
+        method: 'POST',
 
-      headers: serviceHeaders(env, {
-        'content-type':
-          'application/json',
+        headers:
+          serviceHeaders(
+            env,
+            {
+              'content-type':
+                'application/json',
 
-        prefer:
-          'resolution=merge-duplicates,return=minimal'
-      }),
+              prefer:
+                'resolution=merge-duplicates,return=minimal'
+            }
+          ),
 
-      body:
-        JSON.stringify(payload)
-    }
-  );
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
 
   if (!response.ok) {
     throw new Error(
@@ -1757,27 +2914,36 @@ async function patchCommercialLicense(
   id,
   patch
 ) {
-  if (!id) return;
+  if (!id) {
+    return;
+  }
 
-  const response = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/commercial_licenses?id=eq.${encodeURIComponent(
-      id
-    )}`,
-    {
-      method: 'PATCH',
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/commercial_licenses?id=eq.${encodeURIComponent(
+        id
+      )}`,
+      {
+        method: 'PATCH',
 
-      headers: serviceHeaders(env, {
-        'content-type':
-          'application/json',
+        headers:
+          serviceHeaders(
+            env,
+            {
+              'content-type':
+                'application/json',
 
-        prefer:
-          'return=minimal'
-      }),
+              prefer:
+                'return=minimal'
+            }
+          ),
 
-      body:
-        JSON.stringify(patch)
-    }
-  );
+        body:
+          JSON.stringify(
+            patch
+          )
+      }
+    );
 
   if (!response.ok) {
     throw new Error(
@@ -1790,43 +2956,52 @@ async function patchCommercialLicenseBySubscription(
   env,
   subscription
 ) {
-  if (!subscription?.id) return;
+  if (!subscription?.id) {
+    return;
+  }
 
-  const response = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/commercial_licenses?stripe_subscription_id=eq.${encodeURIComponent(
-      subscription.id
-    )}`,
-    {
-      method: 'PATCH',
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/commercial_licenses?stripe_subscription_id=eq.${encodeURIComponent(
+        subscription.id
+      )}`,
+      {
+        method: 'PATCH',
 
-      headers: serviceHeaders(env, {
-        'content-type':
-          'application/json',
+        headers:
+          serviceHeaders(
+            env,
+            {
+              'content-type':
+                'application/json',
 
-        prefer:
-          'return=minimal'
-      }),
+              prefer:
+                'return=minimal'
+            }
+          ),
 
-      body: JSON.stringify({
-        status:
-          subscription.status ||
-          'inactive',
+        body:
+          JSON.stringify({
+            status:
+              subscription.status ||
+              'inactive',
 
-        current_period_end:
-          subscription.current_period_end ||
-          null,
+            current_period_end:
+              subscription.current_period_end ||
+              null,
 
-        stripe_customer_id:
-          typeof subscription.customer ===
-          'string'
-            ? subscription.customer
-            : null,
+            stripe_customer_id:
+              typeof subscription.customer ===
+              'string'
+                ? subscription.customer
+                : null,
 
-        updated_at:
-          new Date().toISOString()
-      })
-    }
-  );
+            updated_at:
+              new Date()
+                .toISOString()
+          })
+      }
+    );
 
   if (!response.ok) {
     throw new Error(
@@ -1841,9 +3016,13 @@ async function stripeWebhook(
 ) {
   try {
     const webhookSecrets =
-      stripeWebhookSecrets(env);
+      stripeWebhookSecrets(
+        env
+      );
 
-    if (!webhookSecrets.length) {
+    if (
+      !webhookSecrets.length
+    ) {
       return json(
         {
           error:
@@ -1896,35 +3075,61 @@ async function stripeWebhook(
       'checkout.session.completed'
     ) {
       const session =
-        event.data?.object;
+        event.data
+          ?.object;
 
       if (
-        session?.metadata
-          ?.afk_commercial === '1'
+        session
+          ?.metadata
+          ?.afk_commission ===
+        '1'
       ) {
-        const email = String(
-          session.customer_details
-            ?.email ||
-            session.customer_email ||
-            session.metadata
+        if (
+          session
+            .payment_status ===
+          'paid'
+        ) {
+          await markCommissionPaymentPaid(
+            env,
+            session
+          );
+        }
+      } else if (
+        session
+          ?.metadata
+          ?.afk_commercial ===
+        '1'
+      ) {
+        const email =
+          String(
+            session
+              .customer_details
+              ?.email ||
+            session
+              .customer_email ||
+            session
+              .metadata
               ?.customer_email ||
             ''
-        )
-          .trim()
-          .toLowerCase();
+          )
+            .trim()
+            .toLowerCase();
 
         if (
           email &&
-          session.metadata
+          session
+            .metadata
             ?.plan_type ===
             'lifetime' &&
-          session.payment_status ===
+          session
+            .payment_status ===
             'paid'
         ) {
           await upsertCommercialLicense(
             env,
             {
-              customer_email: email,
+              customer_email:
+                email,
 
               plan_type:
                 'lifetime',
@@ -1950,7 +3155,8 @@ async function stripeWebhook(
           );
         } else if (
           email &&
-          session.metadata
+          session
+            .metadata
             ?.plan_type ===
             'monthly' &&
           session.subscription
@@ -1965,7 +3171,8 @@ async function stripeWebhook(
           );
         }
       } else if (
-        session?.payment_status ===
+        session
+          ?.payment_status ===
         'paid'
       ) {
         await upsertOrder(
@@ -1981,7 +3188,8 @@ async function stripeWebhook(
     ) {
       await patchCommercialLicenseBySubscription(
         env,
-        event.data?.object
+        event.data
+          ?.object
       );
     }
 
@@ -1989,7 +3197,10 @@ async function stripeWebhook(
       received: true
     });
   } catch (error) {
-    return json({ error: safeMessage(error) }, 400);
+    return json(
+      { error: safeMessage(error) },
+      400
+    );
   }
 }
 
@@ -2011,20 +3222,23 @@ async function requireUser(
   }
 
   const token =
-    authorization.slice(7);
+    authorization.slice(
+      7
+    );
 
-  const response = await fetch(
-    `${env.SUPABASE_URL}/auth/v1/user`,
-    {
-      headers: {
-        apikey:
-          env.SUPABASE_PUBLISHABLE_KEY,
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/auth/v1/user`,
+      {
+        headers: {
+          apikey:
+            env.SUPABASE_PUBLISHABLE_KEY,
 
-        authorization:
-          `Bearer ${token}`
+          authorization:
+            `Bearer ${token}`
+        }
       }
-    }
-  );
+    );
 
   if (!response.ok) {
     return null;
@@ -2051,7 +3265,8 @@ async function requireAdmin(
     user.email || ''
   ).toLowerCase() ===
     String(
-      env.ADMIN_EMAIL || ''
+      env.ADMIN_EMAIL ||
+      ''
     ).toLowerCase()
     ? user
     : null;
@@ -2061,12 +3276,13 @@ async function getProduct(
   env,
   id
 ) {
-  const rows = await supabaseRest(
-    env,
-    `products?id=eq.${encodeURIComponent(
-      id
-    )}&select=id,name,status,personal_price_cents,commercial_price_cents`
-  );
+  const rows =
+    await supabaseRest(
+      env,
+      `products?id=eq.${encodeURIComponent(
+        id
+      )}&select=id,name,status,personal_price_cents,commercial_price_cents`
+    );
 
   return rows[0] || null;
 }
@@ -2098,16 +3314,20 @@ async function upsertOrder(
         : null,
 
     product_id:
-      session.metadata?.product_id,
+      session.metadata
+        ?.product_id,
 
     license_type:
-      session.metadata?.license_type,
+      session.metadata
+        ?.license_type,
 
     amount_total_cents:
-      session.amount_total ?? null,
+      session.amount_total ??
+      null,
 
     customer_email:
-      session.customer_details?.email ||
+      session.customer_details
+        ?.email ||
       session.customer_email ||
       null,
 
@@ -2116,23 +3336,30 @@ async function upsertOrder(
       'paid'
   };
 
-  const response = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/orders?on_conflict=stripe_checkout_session_id`,
-    {
-      method: 'POST',
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/orders?on_conflict=stripe_checkout_session_id`,
+      {
+        method: 'POST',
 
-      headers: serviceHeaders(env, {
-        'content-type':
-          'application/json',
+        headers:
+          serviceHeaders(
+            env,
+            {
+              'content-type':
+                'application/json',
 
-        prefer:
-          'resolution=merge-duplicates,return=minimal'
-      }),
+              prefer:
+                'resolution=merge-duplicates,return=minimal'
+            }
+          ),
 
-      body:
-        JSON.stringify(payload)
-    }
-  );
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
 
   if (!response.ok) {
     throw new Error(
@@ -2148,24 +3375,33 @@ async function createSignedDownload(
   const encodedPath =
     storagePath
       .split('/')
-      .map(encodeURIComponent)
+      .map(
+        encodeURIComponent
+      )
       .join('/');
 
-  const response = await fetch(
-    `${env.SUPABASE_URL}/storage/v1/object/sign/mesh-files/${encodedPath}`,
-    {
-      method: 'POST',
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/storage/v1/object/sign/mesh-files/${encodedPath}`,
+      {
+        method: 'POST',
 
-      headers: serviceHeaders(env, {
-        'content-type':
-          'application/json'
-      }),
+        headers:
+          serviceHeaders(
+            env,
+            {
+              'content-type':
+                'application/json'
+            }
+          ),
 
-      body: JSON.stringify({
-        expiresIn: 600
-      })
-    }
-  );
+        body:
+          JSON.stringify({
+            expiresIn:
+              600
+          })
+      }
+    );
 
   const data =
     await response.json();
@@ -2176,13 +3412,15 @@ async function createSignedDownload(
   ) {
     throw new Error(
       data.message ||
-        data.error ||
-        'Could not create download link.'
+      data.error ||
+      'Could not create download link.'
     );
   }
 
   return `${env.SUPABASE_URL}/storage/v1${data.signedURL}${
-    data.signedURL.includes('?')
+    data.signedURL.includes(
+      '?'
+    )
       ? '&'
       : '?'
   }download=1`;
@@ -2192,13 +3430,16 @@ async function supabaseRest(
   env,
   query
 ) {
-  const response = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/${query}`,
-    {
-      headers:
-        serviceHeaders(env)
-    }
-  );
+  const response =
+    await fetch(
+      `${env.SUPABASE_URL}/rest/v1/${query}`,
+      {
+        headers:
+          serviceHeaders(
+            env
+          )
+      }
+    );
 
   const data =
     await response.json();
@@ -2206,8 +3447,8 @@ async function supabaseRest(
   if (!response.ok) {
     throw new Error(
       data.message ||
-        data.error ||
-        'Database request failed.'
+      data.error ||
+      'Database request failed.'
     );
   }
 
@@ -2231,10 +3472,12 @@ function serviceHeaders(
 
 function stripeMode(env) {
   return String(
-    env.STRIPE_MODE || 'live'
+    env.STRIPE_MODE ||
+    'live'
   )
     .trim()
-    .toLowerCase() === 'test'
+    .toLowerCase() ===
+    'test'
     ? 'test'
     : 'live';
 }
@@ -2247,11 +3490,11 @@ function stripeSecretKey(env) {
     mode === 'test'
       ? String(
           env.STRIPE_SECRET_KEY_TEST ||
-            ''
+          ''
         ).trim()
       : String(
           env.STRIPE_SECRET_KEY ||
-            ''
+          ''
         ).trim();
 
   if (!key) {
@@ -2265,21 +3508,25 @@ function stripeSecretKey(env) {
   return key;
 }
 
-function stripeWebhookSecrets(env) {
+function stripeWebhookSecrets(
+  env
+) {
   return [
     String(
       env.STRIPE_WEBHOOK_SECRET ||
-        ''
+      ''
     ).trim(),
 
     String(
       env.STRIPE_WEBHOOK_SECRET_TEST ||
-        ''
+      ''
     ).trim()
   ].filter(Boolean);
 }
 
-function assertServerConfig(env) {
+function assertServerConfig(
+  env
+) {
   const needed = [
     'SUPABASE_SERVICE_ROLE_KEY',
     'SUPABASE_URL',
@@ -2288,10 +3535,13 @@ function assertServerConfig(env) {
 
   const missing =
     needed.filter(
-      key => !env[key]
+      key =>
+        !env[key]
     );
 
-  if (missing.length) {
+  if (
+    missing.length
+  ) {
     throw new Error(
       `Server setup incomplete: ${missing.join(
         ', '
@@ -2302,28 +3552,35 @@ function assertServerConfig(env) {
 
 function isShopLive(env) {
   return String(
-    env.SHOP_LIVE || ''
+    env.SHOP_LIVE ||
+    ''
   )
     .trim()
-    .toLowerCase() === 'true';
+    .toLowerCase() ===
+    'true';
 }
 
 async function sendCommissionNotification(
   env,
   commission
 ) {
-  const apiKey = String(
-    env.RESEND_API_KEY || ''
-  ).trim();
+  const apiKey =
+    String(
+      env.RESEND_API_KEY ||
+      ''
+    ).trim();
 
-  const to = String(
-    env.COMMISSION_EMAIL || ''
-  ).trim();
+  const to =
+    String(
+      env.COMMISSION_EMAIL ||
+      ''
+    ).trim();
 
-  const from = String(
-    env.COMMISSION_FROM_EMAIL ||
+  const from =
+    String(
+      env.COMMISSION_FROM_EMAIL ||
       'AFKProbably Commissions <onboarding@resend.dev>'
-  ).trim();
+    ).trim();
 
   if (!apiKey) {
     throw new Error(
@@ -2339,8 +3596,14 @@ async function sendCommissionNotification(
 
   const subjectName =
     commission.name
-      .replace(/[\r\n]+/g, ' ')
-      .slice(0, 80);
+      .replace(
+        /[\r\n]+/g,
+        ' '
+      )
+      .slice(
+        0,
+        80
+      );
 
   const lines = [
     'New AFKProbably commission request',
@@ -2368,64 +3631,105 @@ async function sendCommissionNotification(
   const html = `
     <div style="font-family:Arial,sans-serif;line-height:1.55;color:#24123a">
       <h2 style="margin:0 0 16px">New AFKProbably commission request</h2>
-      <p><strong>Name:</strong> ${escapeHtml(
-        commission.name
-      )}</p>
-      <p><strong>Email:</strong> ${escapeHtml(
-        commission.email
-      )}</p>
-      <p><strong>Project type:</strong> ${escapeHtml(
-        commission.projectType
-      )}</p>
-      <p><strong>Budget:</strong> ${escapeHtml(
-        commission.budget ||
+
+      <p>
+        <strong>Name:</strong>
+        ${escapeHtml(
+          commission.name
+        )}
+      </p>
+
+      <p>
+        <strong>Email:</strong>
+        ${escapeHtml(
+          commission.email
+        )}
+      </p>
+
+      <p>
+        <strong>Project type:</strong>
+        ${escapeHtml(
+          commission.projectType
+        )}
+      </p>
+
+      <p>
+        <strong>Budget:</strong>
+        ${escapeHtml(
+          commission.budget ||
           'Not provided'
-      )}</p>
-      <p><strong>Desired deadline:</strong> ${escapeHtml(
-        commission.deadline ||
+        )}
+      </p>
+
+      <p>
+        <strong>Desired deadline:</strong>
+        ${escapeHtml(
+          commission.deadline ||
           'Not provided'
-      )}</p>
-      <p><strong>Reference links:</strong> ${escapeHtml(
-        commission.referenceLinks ||
+        )}
+      </p>
+
+      <p>
+        <strong>Reference links:</strong>
+        ${escapeHtml(
+          commission.referenceLinks ||
           'None provided'
-      )}</p>
+        )}
+      </p>
+
       <hr style="border:0;border-top:1px solid #ddd;margin:20px 0">
-      <p><strong>Project description:</strong></p>
-      <p style="white-space:pre-wrap">${escapeHtml(
-        commission.description
-      )}</p>
+
+      <p>
+        <strong>
+          Project description:
+        </strong>
+      </p>
+
+      <p style="white-space:pre-wrap">
+        ${escapeHtml(
+          commission.description
+        )}
+      </p>
     </div>
   `;
 
-  const response = await fetch(
-    'https://api.resend.com/emails',
-    {
-      method: 'POST',
+  const response =
+    await fetch(
+      'https://api.resend.com/emails',
+      {
+        method: 'POST',
 
-      headers: {
-        authorization:
-          `Bearer ${apiKey}`,
+        headers: {
+          authorization:
+            `Bearer ${apiKey}`,
 
-        'content-type':
-          'application/json'
-      },
+          'content-type':
+            'application/json'
+        },
 
-      body: JSON.stringify({
-        from,
-        to: [to],
-        reply_to:
-          commission.email,
+        body:
+          JSON.stringify({
+            from,
 
-        subject:
-          `New commission request — ${subjectName}`,
+            to: [
+              to
+            ],
 
-        text:
-          lines.join('\n'),
+            reply_to:
+              commission.email,
 
-        html
-      })
-    }
-  );
+            subject:
+              `New commission request — ${subjectName}`,
+
+            text:
+              lines.join(
+                '\n'
+              ),
+
+            html
+          })
+      }
+    );
 
   const raw =
     await response.text();
@@ -2441,7 +3745,9 @@ async function sendCommissionNotification(
   try {
     result =
       raw
-        ? JSON.parse(raw)
+        ? JSON.parse(
+            raw
+          )
         : null;
   } catch {}
 
@@ -2457,8 +3763,12 @@ async function sendCommissionNotification(
   return result.id;
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
+function escapeHtml(
+  value
+) {
+  return String(
+    value ?? ''
+  )
     .replace(
       /&/g,
       '&amp;'
@@ -2488,12 +3798,24 @@ function normalizeProductImages(
     ...product,
 
     images: [
-      ...(product.product_images ||
-        [])
+      ...(
+        product
+          .product_images ||
+        []
+      )
     ].sort(
-      (a, b) =>
-        (a.sort_order || 0) -
-        (b.sort_order || 0)
+      (
+        a,
+        b
+      ) =>
+        (
+          a.sort_order ||
+          0
+        ) -
+        (
+          b.sort_order ||
+          0
+        )
     ),
 
     product_images:
@@ -2509,12 +3831,19 @@ function cleanText(
     value || ''
   )
     .trim()
-    .slice(0, max);
+    .slice(
+      0,
+      max
+    );
 }
 
-function cleanDate(value) {
+function cleanDate(
+  value
+) {
   return /^\d{4}-\d{2}-\d{2}$/.test(
-    String(value || '')
+    String(
+      value || ''
+    )
   )
     ? String(value)
     : null;
@@ -2528,22 +3857,32 @@ async function verifyStripeSignature(
   const entries =
     header
       .split(',')
-      .map(x => x.trim());
+      .map(
+        x =>
+          x.trim()
+      );
 
   const timestamp =
     entries
-      .find(x =>
-        x.startsWith('t=')
+      .find(
+        x =>
+          x.startsWith(
+            't='
+          )
       )
       ?.slice(2);
 
   const signatures =
     entries
-      .filter(x =>
-        x.startsWith('v1=')
+      .filter(
+        x =>
+          x.startsWith(
+            'v1='
+          )
       )
-      .map(x =>
-        x.slice(3)
+      .map(
+        x =>
+          x.slice(3)
       );
 
   if (
@@ -2556,10 +3895,14 @@ async function verifyStripeSignature(
   if (
     Math.abs(
       Math.floor(
-        Date.now() / 1000
+        Date.now() /
+        1000
       ) -
-        Number(timestamp)
-    ) > 300
+      Number(
+        timestamp
+      )
+    ) >
+    300
   ) {
     return false;
   }
@@ -2568,18 +3911,24 @@ async function verifyStripeSignature(
     await crypto.subtle.importKey(
       'raw',
 
-      new TextEncoder().encode(
-        secret
-      ),
+      new TextEncoder()
+        .encode(
+          secret
+        ),
 
       {
-        name: 'HMAC',
-        hash: 'SHA-256'
+        name:
+          'HMAC',
+
+        hash:
+          'SHA-256'
       },
 
       false,
 
-      ['sign']
+      [
+        'sign'
+      ]
     );
 
   const signed =
@@ -2588,18 +3937,25 @@ async function verifyStripeSignature(
 
       key,
 
-      new TextEncoder().encode(
-        `${timestamp}.${payload}`
-      )
+      new TextEncoder()
+        .encode(
+          `${timestamp}.${payload}`
+        )
     );
 
   const expected = [
-    ...new Uint8Array(signed)
+    ...new Uint8Array(
+      signed
+    )
   ]
-    .map(b =>
-      b
-        .toString(16)
-        .padStart(2, '0')
+    .map(
+      b =>
+        b
+          .toString(16)
+          .padStart(
+            2,
+            '0'
+          )
     )
     .join('');
 
@@ -2616,7 +3972,10 @@ function constantTimeEqual(
   a,
   b
 ) {
-  if (a.length !== b.length) {
+  if (
+    a.length !==
+    b.length
+  ) {
     return false;
   }
 
@@ -2635,20 +3994,28 @@ function constantTimeEqual(
   return diff === 0;
 }
 
-function isUuid(value) {
+function isUuid(
+  value
+) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value || ''
   );
 }
 
-function capitalize(value) {
+function capitalize(
+  value
+) {
   return (
-    value.charAt(0).toUpperCase() +
+    value
+      .charAt(0)
+      .toUpperCase() +
     value.slice(1)
   );
 }
 
-function safeMessage(error) {
+function safeMessage(
+  error
+) {
   return error instanceof Error
     ? error.message
     : 'Unexpected server error.';
@@ -2659,9 +4026,12 @@ function json(
   status = 200
 ) {
   return new Response(
-    JSON.stringify(data),
+    JSON.stringify(
+      data
+    ),
     {
       status,
+
       headers:
         JSON_HEADERS
     }
