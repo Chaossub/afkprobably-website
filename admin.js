@@ -651,7 +651,7 @@ If a customer has purchased it, it will be hidden instead so their order/downloa
 
     const { data, error } = await sb
       .from('commission_requests')
-      .select('*')
+      .select('*, commission_payments(*)')
       .order('created_at', {
         ascending: false
       });
@@ -660,7 +660,7 @@ If a customer has purchased it, it will be hidden instead so their order/downloa
       commissionRequestList.innerHTML =
         `<p class="commission-empty">${
           error.code === '42P01'
-            ? 'Run supabase/customer-shop-upgrade.sql to enable commission requests.'
+            ? 'Run the commission payments SQL first.'
             : escapeHtml(error.message)
         }</p>`;
 
@@ -770,8 +770,117 @@ If a customer has purchased it, it will be hidden instead so their order/downloa
         }
 
         <div
+          style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(78,30,120,.14)"
+        >
+          <p class="eyebrow" style="margin-bottom:8px">MESSAGE CUSTOMER</p>
+
+          <label style="display:block;margin-bottom:8px">
+            Subject
+            <input
+              type="text"
+              data-commission-subject="${item.id}"
+              value="${escapeHtml(`AFKProbably commission — ${item.project_type || item.name}`)}"
+              maxlength="180"
+              style="width:100%;margin-top:6px"
+            >
+          </label>
+
+          <label style="display:block">
+            Message
+            <textarea
+              data-commission-message="${item.id}"
+              rows="5"
+              maxlength="5000"
+              placeholder="Write your message to ${escapeHtml(item.name)}…"
+              style="width:100%;margin-top:6px"
+            ></textarea>
+          </label>
+
+          <div class="listing-buttons" style="margin-top:10px">
+            <button
+              class="tiny-button"
+              type="button"
+              data-email-commission="${item.id}"
+            >
+              Email customer
+            </button>
+          </div>
+        </div>
+
+        <div
+          style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(78,30,120,.14)"
+        >
+          <p class="eyebrow" style="margin-bottom:8px">PAYMENT REQUEST</p>
+
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:10px">
+            <label>
+              Description
+              <input
+                type="text"
+                data-payment-label="${item.id}"
+                placeholder="50% commission deposit"
+                maxlength="180"
+                style="width:100%;margin-top:6px"
+              >
+            </label>
+
+            <label>
+              Amount ($)
+              <input
+                type="number"
+                data-payment-amount="${item.id}"
+                min="0.50"
+                step="0.01"
+                placeholder="75.00"
+                style="width:100%;margin-top:6px"
+              >
+            </label>
+          </div>
+
+          <div class="listing-buttons" style="margin-top:10px">
+            <button
+              class="tiny-button"
+              type="button"
+              data-payment-commission="${item.id}"
+            >
+              Create &amp; email payment link
+            </button>
+          </div>
+
+          <div style="margin-top:12px">
+            ${
+              (item.commission_payments || []).length
+                ? [...item.commission_payments]
+                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                    .map(payment => `
+                      <div
+                        style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:9px 0;border-top:1px solid rgba(78,30,120,.10)"
+                      >
+                        <div>
+                          <strong>${escapeHtml(payment.label || 'Commission payment')}</strong>
+                          <div class="commission-request-meta">
+                            <span>${formatPrice(payment.amount_cents)}</span>
+                            <span>${escapeHtml(String(payment.status || 'unpaid').toUpperCase())}</span>
+                          </div>
+                        </div>
+                        ${
+                          payment.status !== 'paid' && payment.stripe_checkout_url
+                            ? `<a class="tiny-button" href="${escapeHtml(payment.stripe_checkout_url)}" target="_blank" rel="noopener noreferrer">Open checkout</a>`
+                            : payment.status === 'paid'
+                              ? '<strong>Paid ✓</strong>'
+                              : ''
+                        }
+                      </div>
+                    `)
+                    .join('')
+                : '<p class="commission-empty" style="margin:6px 0 0">No payment requests yet.</p>'
+            }
+          </div>
+        </div>
+
+        <div
           class="listing-buttons"
-          style="margin-top:12px"
+          style="margin-top:18px"
         >
 
           <button
@@ -818,6 +927,124 @@ If a customer has purchased it, it will be hidden instead so their order/downloa
           }
         )
       );
+
+    commissionRequestList
+      .querySelectorAll('[data-email-commission]')
+      .forEach(button => {
+        button.addEventListener('click', async () => {
+          const id = button.dataset.emailCommission;
+
+          const subject = commissionRequestList
+            .querySelector(`[data-commission-subject="${id}"]`)
+            ?.value.trim() || '';
+
+          const message = commissionRequestList
+            .querySelector(`[data-commission-message="${id}"]`)
+            ?.value.trim() || '';
+
+          if (!message) {
+            alert('Write a message first.');
+            return;
+          }
+
+          button.disabled = true;
+          button.textContent = 'Sending…';
+
+          try {
+            await callAdminApi('/api/admin/commission-email', {
+              commissionId: id,
+              subject,
+              message
+            });
+
+            alert('Email sent to the customer.');
+
+            const messageBox = commissionRequestList
+              .querySelector(`[data-commission-message="${id}"]`);
+
+            if (messageBox) {
+              messageBox.value = '';
+            }
+          } catch (error) {
+            alert(error.message || String(error));
+          } finally {
+            button.disabled = false;
+            button.textContent = 'Email customer';
+          }
+        });
+      });
+
+    commissionRequestList
+      .querySelectorAll('[data-payment-commission]')
+      .forEach(button => {
+        button.addEventListener('click', async () => {
+          const id = button.dataset.paymentCommission;
+
+          const label = commissionRequestList
+            .querySelector(`[data-payment-label="${id}"]`)
+            ?.value.trim() || '';
+
+          const amountValue = commissionRequestList
+            .querySelector(`[data-payment-amount="${id}"]`)
+            ?.value || '';
+
+          const amountCents = Math.round(Number(amountValue) * 100);
+
+          if (!label) {
+            alert(
+              'Add a payment description, such as “50% commission deposit”.'
+            );
+            return;
+          }
+
+          if (
+            !Number.isInteger(amountCents) ||
+            amountCents < 50
+          ) {
+            alert(
+              'Enter a payment amount of at least $0.50.'
+            );
+            return;
+          }
+
+          if (
+            !confirm(
+              `Create and email a ${formatPrice(
+                amountCents
+              )} payment request?`
+            )
+          ) {
+            return;
+          }
+
+          button.disabled = true;
+          button.textContent = 'Creating…';
+
+          try {
+            const result = await callAdminApi(
+              '/api/admin/commission-payment',
+              {
+                commissionId: id,
+                label,
+                amountCents
+              }
+            );
+
+            alert(
+              `Payment request emailed to the customer for ${formatPrice(
+                result.amountCents
+              )}.`
+            );
+
+            await loadCommissions();
+          } catch (error) {
+            alert(error.message || String(error));
+            button.disabled = false;
+            button.textContent =
+              'Create & email payment link';
+          }
+        });
+      });
 
     commissionRequestList
       .querySelectorAll(
@@ -870,6 +1097,42 @@ If a customer has purchased it, it will be hidden instead so their order/downloa
           }
         );
       });
+  }
+
+  async function callAdminApi(path, body) {
+    const {
+      data: { session }
+    } = await sb.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error(
+        'Your admin session expired. Please sign in again.'
+      );
+    }
+
+    const response = await fetch(path, {
+      method: 'POST',
+
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${session.access_token}`
+      },
+
+      body: JSON.stringify(body)
+    });
+
+    const result = await response
+      .json()
+      .catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        result.error ||
+          'Request failed.'
+      );
+    }
+
+    return result;
   }
 
   function formatPrice(cents) {
