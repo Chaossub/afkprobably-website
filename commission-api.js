@@ -813,6 +813,20 @@ async function createStripeCheckout(
   );
 
 
+  /*
+    IMPORTANT:
+    Disable Stripe Managed Payments for these
+    commission checkout sessions.
+
+    Without this, Stripe can require a product
+    tax code and reject the checkout.
+  */
+  params.set(
+    'managed_payments[enabled]',
+    'false'
+  );
+
+
   params.set(
     'success_url',
     `${url.origin}/commissions.html?payment=success`
