@@ -5,20 +5,91 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AFKProbably</title>
 
-  <meta
-    http-equiv="refresh"
-    content="0; url=/shop"
-  />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #c7b6ff, #a64cff);
+      color: #3d126b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-  <script>
-    window.location.replace('/shop');
-  </script>
+    .wrap {
+      width: min(92%, 760px);
+      text-align: center;
+    }
+
+    .logo {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 28px;
+      padding: 3rem 2rem;
+      box-shadow: 0 20px 60px rgba(75, 20, 120, 0.18);
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      margin: 0 0 1rem;
+      line-height: 1;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .status {
+      margin-top: 1.5rem;
+      font-weight: 700;
+    }
+
+    .admin-link {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .admin-link a {
+      color: #5b16a8;
+    }
+  </style>
 </head>
 
 <body>
-  <p>
-    Opening AFKProbably Shop…
-    <a href="/shop">Click here if you are not redirected.</a>
-  </p>
+  <main class="wrap">
+    <div class="logo">☾ AFKProbably</div>
+
+    <section class="card">
+      <div style="font-weight:700;letter-spacing:.16em;margin-bottom:1rem;">
+        AFKPROBABLY 3D
+      </div>
+
+      <h1>Online Shop Coming Soon</h1>
+
+      <p>
+        The AFKProbably shop is currently in the works.
+        Soon you'll be able to purchase downloadable 3D-print meshes,
+        commercial licensing, and request custom commissions directly
+        through the site.
+      </p>
+
+      <div class="status">
+        🚧 Currently in Development
+      </div>
+
+      <p><em>AFK for now. Probably not for long.</em></p>
+
+      <div class="admin-link">
+        <a href="/admin">Admin</a>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
